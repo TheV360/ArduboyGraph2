@@ -18,7 +18,7 @@ float Function::calculate(const float x = 0.0f) {
 			} else if (function[i] == TOKEN_POW) {
 				stack.push(pow(stack.pop(), stack.pop()));
 			} else if (function[i] == TOKEN_MOD) {
-				// stack.push(stack.pop() % stack.pop());
+				stack.push(fmod(stack.pop(), stack.pop()));
 			} else if (function[i] == TOKEN_VAR) {
 				stack.push(x);
 			} else if (function[i] == TOKEN_NEG) {
@@ -32,10 +32,9 @@ float Function::calculate(const float x = 0.0f) {
 	return stack.pop();
 }
 
-void Function::getFunction(const char* input) {
-	return;
-	/*
-	uint8_t inputLen = 0;
+bool Function::getFunction(const char* input) {
+	return false;
+	/*uint8_t inputLen = 0;
 	while (input[++inputLen] != '\0');
 	
 	uint8_t prevToken = TOKEN_NOP;
@@ -51,13 +50,20 @@ void Function::getFunction(const char* input) {
 		prevToken = token;
 		token = getToken(input[i]);
 		
-		// Encountering a number:
-		function[outputFIndex] = outputCIndex;
-		constants[outputCIndex++] = strtod(input + i, endOfNumber);
-		if (input + i == endOfNumber) continue;
-		i = endOfNumber - input - 1;
+		if (token == TOKEN_UNKNOWN) {
+			// Encountering a number:
+			function[outputFIndex++] = outputCIndex;
+			if (prevToken == TOKEN_SUB) {
+				constants[outputCIndex++] = strtod(input + i - 1, endOfNumber);
+			} else {
+				constants[outputCIndex++] = strtod(input + i, endOfNumber);
+			}
+			if (input + i == endOfNumber) continue;
+			i = endOfNumber - input - 1;
+		} else if (token == )
 	}
-	*/
+	
+	return true;*/
 }
 
 uint8_t Function::getToken(const char input) {
@@ -69,5 +75,6 @@ uint8_t Function::getToken(const char input) {
 		case '^': return TOKEN_POW;
 		case 'x': return TOKEN_VAR;
 		case '\0':return TOKEN_NOP;
+		default:  return TOKEN_UNKNOWN;
 	}
 }

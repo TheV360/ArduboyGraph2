@@ -1,5 +1,5 @@
 *.elf
-*.hex
+# *.hex
 *.lnk
 -*-/
 .vscode/

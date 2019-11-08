@@ -4,7 +4,9 @@
 #define FUNCTION_MAX_TOKENS 32
 #define FUNCTION_MAX_CONST 8
 
+#define TOKEN_UNKNOWN 0x00
 #define TOKEN_MINIMUM 0x80
+#define TOKEN_FUNCTION 0xa0
 
 #define TOKEN_NEG 0x80 // - again
 #define TOKEN_ADD 0x81 // +
@@ -37,7 +39,7 @@ class Function {
 		
 		float calculate(const float x);
 		
-		void getFunction(const char* input);
+		bool getFunction(const char* input);
 		
 		uint8_t getToken(const char input);
 };
