@@ -1,15 +1,21 @@
 #include "keypad.h"
 
-void Keypad::begin(float number = 0.0f, uint8_t digits = 2) {
+void Keypad::begin(const float number = 0.0f, const uint8_t digits = 2) {
+	// Reset submission status.
 	submitted = false;
 	
+	// Clear existing text, if any.
 	while (textLen > 0) text[textLen--] = '\0';
 	
+	// Get string from number.
 	dtostrf(number, 0, digits, text);
+	// Get length.
 	while (text[++textLen] != '\0');
 }
 
-float Keypad::lazyNumberEntry(float number = 0.0f, uint8_t digits = 2) {
+// The lazy way to do things.
+// Entirely takes over the loop. Don't use?
+float Keypad::lazyNumberEntry(const float number = 0.0f, const uint8_t digits = 2) {
 	begin(number, digits);
 	
 	while (!submitted) {
@@ -27,16 +33,19 @@ float Keypad::lazyNumberEntry(float number = 0.0f, uint8_t digits = 2) {
 	return getValue();
 }
 
+// The right way to do things.
 void Keypad::update() {
-	if (ab.justPressed(UP_BUTTON   ) && cursor >= width) cursor -= width;
-	if (ab.justPressed(DOWN_BUTTON )) cursor += width;
 	if (ab.justPressed(LEFT_BUTTON ) && cursor > 0) cursor--;
-	if (ab.justPressed(RIGHT_BUTTON)) cursor++;
+	if (ab.justPressed(RIGHT_BUTTON) && cursor < (width * height) - 1) cursor++;
+	
+	if (ab.justPressed(UP_BUTTON   ) && cursor >= width) cursor -= width;
+	if (ab.justPressed(DOWN_BUTTON ) && cursor < width * (height - 1)) cursor += width;
 	
 	if (ab.justPressed(A_BUTTON)) press();
 	if (ab.justPressed(B_BUTTON)) backspace();
 }
 
+// The right way to do things.
 void Keypad::draw() {
 	// Keypad portion
 	for (uint8_t i = 0; i <= width; i++)  {
@@ -70,14 +79,17 @@ void Keypad::draw() {
 	gf.print(text);
 }
 
+// Because `submitted` is private.
 bool Keypad::isSubmitted() {
 	return submitted;
 }
 
+// Get value after everything is said and done.
 float Keypad::getValue() {
 	return atof(text);
 }
 
+// This is what happens when you press a button.
 void Keypad::press() {
 	switch (cursor) {
 		case 0: // OK
@@ -96,6 +108,7 @@ void Keypad::press() {
 	}
 }
 
+// And when you backspace
 void Keypad::backspace() {
 	if (textLen) text[--textLen] = '\0';
 }

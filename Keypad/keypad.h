@@ -2,7 +2,7 @@
 #define KEYPADOBJ_H
 
 const char KEYPAD_LABELS[] PROGMEM = {
-	'k', 'e', 'd',
+	'>', '<', '*',
 	'7', '8', '9',
 	'4', '5', '6',
 	'1', '2', '3',
@@ -11,9 +11,9 @@ const char KEYPAD_LABELS[] PROGMEM = {
 
 class Keypad {
 	public:
-		void begin(float number, uint8_t digits);
+		void begin(const float number, const uint8_t digits);
 		
-		float lazyNumberEntry(float number, uint8_t digits);
+		float lazyNumberEntry(const float number, const uint8_t digits);
 		
 		void update();
 		void draw();
@@ -35,7 +35,7 @@ class Keypad {
 		uint8_t textLen;
 		
 		uint8_t width = 3;
-		uint8_t height = 6;
+		uint8_t height = 5;
 		
 		bool submitted = false;
 };

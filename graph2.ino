@@ -10,21 +10,14 @@ Tinyfont tf = Tinyfont(ab.sBuffer, Arduboy2::width(), Arduboy2::height());
 
 // I'm a heathen and I use the arduboy class in my classes.
 
-float lerp(float a, float b, float p) {
-	return a + (b - a) * p;
-}
-
 #include "Keypad/keypad.cpp"
-#include "Function/function.cpp"
-
 Keypad keypad;
+
+#include "Function/function.cpp"
 Function function;
 
 #include "Graph/graph.cpp"
 Graph graph;
-
-uint8_t h = 0;
-float res;
 
 uint8_t cursor = 0;
 bool toTheTokens = false;
@@ -36,11 +29,25 @@ void setup() {
 	
 	graph.begin();
 	
+	// function.getFunction(F("2x^2+5x+2"));
+	// 2x^2 + 5x + 2
+	
+	// x 2 ^ 2 *
+	// 
+	
 	function.constants[0] = 2.0f;
-	function.function[0] = 0xFE;
-	function.function[1] = 0xFE;
-	function.function[2] = 0x82;
-	function.function[3] = 0xFF;
+	function.constants[1] = 5.0f;
+	
+	function.function[0] = TOKEN_VAR;
+	function.function[1] = 0;
+	function.function[2] = TOKEN_POW;
+	function.function[3] = 0;
+	function.function[4] = TOKEN_MUL;
+	function.function[5] = 1;
+	function.function[6] = TOKEN_VAR;
+	function.function[7] = TOKEN_MUL;
+	function.function[8] = TOKEN_ADD;
+	function.function[9] = TOKEN_NOP;
 }
 
 void loop() {
@@ -62,28 +69,25 @@ void loop() {
 		}
 	}
 	if (ab.justPressed(B_BUTTON)) {
-		// res = function.calculate(keypad.lazyNumberEntry(0.0f, 2));
 		graph.recalculate(function);
 		
-		while (!ab.justPressed(A_BUTTON)) {
+		graph.draw();
+		ab.display();
+		for (;;) {
 			if (!ab.nextFrame()) continue;
 			ab.pollButtons();
-			ab.clear();
-			graph.draw();
-			ab.display();
+			if (ab.justPressed(B_BUTTON)) break;
+			ab.display(); // emu gets angry when this not present!!!
 		}
 	}
 	
-	for (uint8_t i = 0; i < 6; i++) {
+	for (uint8_t i = 0; i < 8; i++) {
 		gf.setCursor(0, i * 7);
 		gf.print(function.constants[i]);
 		
 		gf.setCursor(64, i * 7);
 		gf.print(function.function[i], HEX);
 	}
-	
-	gf.setCursor(32, 0);
-	gf.print(res);
 	
 	gf.setCursor(32, cursor*7);
 	gf.print(toTheTokens ? '>' : '<');
