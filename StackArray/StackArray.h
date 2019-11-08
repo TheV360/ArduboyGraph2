@@ -1,16 +1,16 @@
 /*
  *  StackArray.h
  *
- *  Library implementing a generic, dynamic stack (array version).
+ *  Library implementing a generic, dynamic stack(array version).
  *
  *  ---
  *
- *  Copyright (C) 2010  Efstathios Chatzikyriakidis (contact@efxa.org)
+ *  Copyright(C) 2010  Efstathios Chatzikyriakidis(contact@efxa.org)
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
+ * (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -55,224 +55,201 @@
 // the definition of the stack class.
 template<typename T>
 class StackArray {
-  public:
-    // init the stack (constructor).
-    StackArray ();
+	public:
+		// init the stack(constructor).
+		StackArray();
 
-    // clear the stack (destructor).
-    ~StackArray ();
+		// clear the stack(destructor).
+		~StackArray();
 
-    // push an item to the stack.
-    void push (const T i);
+		// push an item to the stack.
+		void push(const T i);
 
-    // pop an item from the stack.
-    T pop ();
+		// pop an item from the stack.
+		T pop();
 
-    // get an item from the stack.
-    T peek () const;
+		// get an item from the stack.
+		T peek() const;
 
-    // get an item on the specific index
-    T peekindex (const int i) const;
+		// check if the stack is empty.
+		bool isEmpty() const;
 
-    //changes the value at specific index
-    void change_value_at (const int i, const T value) const;
+		// get the number of items in the stack.
+		uint8_t count() const;
 
-    // check if the stack is empty.
-    bool isEmpty () const;
+		// check if the stack is full.
+		bool isFull() const;
 
-    // get the number of items in the stack.
-    int count () const;
+		// set the printer of the stack.
+		// void setPrinter(Print & p);
 
-    // check if the stack is full.
-    bool isFull () const;
+	private:
+		// resize the size of the stack.
+		void resize(const uint8_t s);
 
-    // set the printer of the stack.
-    void setPrinter (Print & p);
+		// exit report method in case of error.
+		void exit(const __FlashStringHelper* m) const;
 
-  private:
-    // resize the size of the stack.
-    void resize (const int s);
+/*
+		// led blinking method in case of error.
+		void blink() const;
+*/
 
-    // exit report method in case of error.
-    void exit (const char * m) const;
+		// the initial size of the stack.
+		static const uint8_t initialSize = 2;
 
-    // led blinking method in case of error.
-    void blink () const;
-
-    // the initial size of the stack.
-    static const int initialSize = 2;
-
-    // the pin number of the on-board led.
-    static const int ledPin = 13;
-
-    Print * printer; // the printer of the stack.
-    T * contents;    // the array of the stack.
-    int size;        // the size of the stack.
-    int top;         // the top index of the stack.
+		// the pin number of the on-board led.
+		static const uint8_t ledPin = 13;
+		
+/*
+		Print * printer; // the printer of the stack.
+*/
+		T * contents;    // the array of the stack.
+		uint8_t size;        // the size of the stack.
+		uint8_t top;         // the top index of the stack.
 };
 
-// init the stack (constructor).
+// init the stack(constructor).
 template<typename T>
-StackArray<T>::StackArray () {
-  size = 0;       // set the size of stack to zero.
-  top = 0;        // set the initial top index of the stack.
-  printer = NULL; // set the printer of stack to point nowhere.
+StackArray<T>::StackArray() {
+	size = 0;       // set the size of stack to zero.
+	top = 0;        // set the initial top index of the stack.
+//   printer = NULL; // set the printer of stack to point nowhere.
 
-  // allocate enough memory for the array.
-  contents = (T *) malloc (sizeof (T) * initialSize);
+	// allocate enough memory for the array.
+	contents = (T *) malloc(sizeof(T) * initialSize);
 
-  // if there is a memory allocation error.
-  if (contents == NULL)
-    exit ("STACK: insufficient memory to initialize stack.");
-
-  // set the initial size of the stack.
-  size = initialSize;
+	// set the initial size of the stack.
+	size = initialSize;
 }
 
-// clear the stack (destructor).
+// clear the stack(destructor).
 template<typename T>
-StackArray<T>::~StackArray () {
-  free (contents); // deallocate the array of the stack.
-
-  contents = NULL; // set stack's array pointer to nowhere.
-  printer = NULL;  // set the printer of stack to point nowhere.
-  size = 0;        // set the size of stack to zero.
-  top = 0;         // set the initial top index of the stack.
+StackArray<T>::~StackArray() {
+	free(contents); // deallocate the array of the stack.
+	
+	contents = NULL; // set stack's array pointer to nowhere.
+//   printer = NULL;  // set the printer of stack to point nowhere.
+	size = 0;        // set the size of stack to zero.
+	top = 0;         // set the initial top index of the stack.
 }
 
 // resize the size of the stack.
 template<typename T>
-void StackArray<T>::resize (const int s) {
-  // defensive issue.
-  if (s <= 0)
-    exit ("STACK: error due to undesirable size for stack size.");
-
-  // reallocate enough memory for the array.
-  contents = (T *) realloc (contents, sizeof (T) * s);
-
-  // if there is a memory allocation error.
-  if (contents == NULL)
-    exit ("STACK: insufficient memory to resize stack.");
-
-  // set the new size of the stack.
-  size = s;
+void StackArray<T>::resize(const uint8_t s) {
+	// defensive issue.
+	if (s <= 0)
+		exit(F("can't resize that small"));
+	
+	// reallocate enough memory for the array.
+	contents = (T *) realloc(contents, sizeof(T) * s);
+	
+	// if there is a memory allocation error.
+	if (contents == NULL)
+		exit(F("no mem"));
+	
+	// set the new size of the stack.
+	size = s;
 }
 
 // push an item to the stack.
 template<typename T>
-void StackArray<T>::push (const T i) {
-  // check if the stack is full.
-  if (isFull ())
-    // double size of array.
-    resize (size * 2);
-
-  // store the item to the array.
-  contents[top++] = i;
-}
-
-// function to change value at a specific index
-template<typename T>
-void StackArray<T>::change_value_at (const int i, const T value) const {
-  if (i >= top) {
-    exit ("STACK: can't change value at index: index does not exist");
-  }
-  // store the item to the array.
-  contents[i] = value;
+void StackArray<T>::push(const T i) {
+	// check if the stack is full.
+	if (isFull())
+		// double size of array.
+		resize(size * 2);
+	
+	// store the item to the array.
+	contents[top++] = i;
 }
 
 // pop an item from the stack.
 template<typename T>
-T StackArray<T>::pop () {
-  // check if the stack is empty.
-  if (isEmpty ())
-    exit ("STACK: can't pop item from stack: stack is empty.");
-
-  // fetch the top item from the array.
-  T item = contents[--top];
-
-  // shrink size of array if necessary.
-  if (!isEmpty () && (top <= size / 4))
-    resize (size / 2);
-
-  // return the top item from the array.
-  return item;
+T StackArray<T>::pop() {
+	// check if the stack is empty.
+	if (isEmpty())
+		exit(F("can't pop, stack empty"));
+	
+	// fetch the top item from the array.
+	T item = contents[--top];
+	
+	// shrink size of array if necessary.
+	if (!isEmpty() && (top <= size / 4))
+		resize(size / 2);
+	
+	// return the top item from the array.
+	return item;
 }
 
 // get an item from the stack.
 template<typename T>
-T StackArray<T>::peek () const {
-  // check if the stack is empty
-  if (isEmpty ())
-    exit ("STACK: can't peek item from stack: stack is empty.");
-
-  // get the top item from the array.
-  return contents[top - 1];
-}
-
-//get an item at specified index
-template<typename T>
-T StackArray<T>::peekindex (const int i)  const{
-  // check if the stack is empty.
-  if (isEmpty ())
-    exit ("STACK: can't peek index item from stack: stack is empty.");
-
-  if (i >= top)
-    exit ("STACK: can't peek index item from stack: stack does not have this many items");
-
-  // get the top item from the array.
-  return contents[i];
+T StackArray<T>::peek() const {
+	// check if the stack is empty.
+	if (isEmpty())
+		exit(F("can't peek, stack empty"));
+	
+	// get the top item from the array.
+	return contents[top - 1];
 }
 
 // check if the stack is empty.
 template<typename T>
-bool StackArray<T>::isEmpty () const {
-  return top == 0;
+bool StackArray<T>::isEmpty() const {
+	return top == 0;
 }
 
 // check if the stack is full.
 template<typename T>
-bool StackArray<T>::isFull () const {
-  return top == size;
+bool StackArray<T>::isFull() const {
+	return top == size;
 }
 
 // get the number of items in the stack.
 template<typename T>
-int StackArray<T>::count () const {
-  return top;
+uint8_t StackArray<T>::count() const {
+	return top;
 }
 
+template<typename T>
+void StackArray<T>::exit(const __FlashStringHelper * m) const {
+	Serial.println(m);
+	for (;;);
+}
+
+/*
 // set the printer of the stack.
 template<typename T>
-void StackArray<T>::setPrinter (Print & p) {
-  printer = &p;
+void StackArray<T>::setPrinter(Print & p) {
+	printer = &p;
 }
-
 // exit report method in case of error.
 template<typename T>
-void StackArray<T>::exit (const char * m) const {
-  // print the message if there is a printer.
-  if (printer)
-    printer->println (m);
+void StackArray<T>::exit(const char * m) const {
+	// print the message if there is a printer.
+	if (printer)
+		printer->println(m);
 
-  // loop blinking until hardware reset.
-  blink ();
+	// loop blinking until hardware reset.
+	blink();
 }
 
 // led blinking method in case of error.
 template<typename T>
-void StackArray<T>::blink () const {
-  // set led pin as output.
-  pinMode (ledPin, OUTPUT);
+void StackArray<T>::blink() const {
+	// set led pin as output.
+	pinMode(ledPin, OUTPUT);
 
-  // continue looping until hardware reset.
-  while (true) {
-    digitalWrite (ledPin, HIGH); // sets the LED on.
-    delay (250);                 // pauses 1/4 of second.
-    digitalWrite (ledPin, LOW);  // sets the LED off.
-    delay (250);                 // pauses 1/4 of second.
-  }
+	// continue looping until hardware reset.
+	while(true) {
+		digitalWrite(ledPin, HIGH); // sets the LED on.
+		delay(250);                 // pauses 1/4 of second.
+		digitalWrite(ledPin, LOW);  // sets the LED off.
+		delay(250);                 // pauses 1/4 of second.
+	}
 
-  // solution selected due to lack of exit() and assert().
+	// solution selected due to lack of exit() and assert().
 }
+*/
 
 #endif // _STACKARRAY_H

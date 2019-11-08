@@ -27,11 +27,13 @@ bool toTheTokens = false;
 void setup() {
 	ab.begin();
 	
-	Serial.begin(800);
+	Serial.begin(9600);
 	
 	graph.begin();
 	
-	if (!function.getFunction(F("2x^2+5x+2"))) {
+	if (!function.getFunction("2*x^2+5*x+2")) {
+		Serial.println(F("GetFunction failed! Fallback"));
+		
 		function.constants[0] = 2.0f;
 		function.constants[1] = 5.0f;
 		

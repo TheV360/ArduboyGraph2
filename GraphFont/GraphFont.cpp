@@ -1,5 +1,5 @@
 #include "GraphFont.h"
-#include "GraphFontSprite.c"
+#include "GraphFontSprite.cpp"
 
 #define GRAPHFONT_HEIGHT 6
 
