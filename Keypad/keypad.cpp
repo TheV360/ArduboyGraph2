@@ -10,8 +10,16 @@ void Keypad::begin(const char* function = NULL) {
 	// Clear existing text, if any.
 	clear();
 	
-	// Copy string
-	if (function) strcpy(text, function);
+	// If we got a function...
+	if (function) {
+		// Copy string
+		strcpy(text, function);
+		// Get length.
+		while (text[++textLen] != '\0');
+	} else {
+		// No length
+		textLen = 0;
+	}
 }
 
 void Keypad::begin(const float number = 0.0f, const uint8_t digits = 2) {
@@ -87,9 +95,6 @@ void Keypad::draw() {
 	// Keypad portion
 	for (uint8_t i = 0; i <= layout.width; i++)  {
 		ab.drawFastVLine(x + i*10, y, layout.height * 10 + 1);
-		Serial.print(i+1);
-		Serial.print('/');
-		Serial.println(layout.width);
 	}
 	for (uint8_t i = 0; i <= layout.height; i++)  {
 		ab.drawFastHLine(x, y + i*10, layout.width * 10 + 1);
@@ -105,13 +110,13 @@ void Keypad::draw() {
 	
 	// Cursor
 	ab.drawRect(
-		x + (cursor % layout.width ) * 10,
-		y + (cursor / layout.height) * 10,
+		x + (cursor % layout.width) * 10,
+		y + (cursor / layout.width) * 10,
 		11, 11, BLACK
 	);
 	ab.drawRect(
-		x + (cursor % layout.width ) * 10 - 1,
-		y + (cursor / layout.height) * 10 - 1,
+		x + (cursor % layout.width) * 10 - 1,
+		y + (cursor / layout.width) * 10 - 1,
 		13, 13, WHITE
 	);
 	
@@ -136,7 +141,7 @@ float Keypad::getValue() {
 
 // Get layout
 void Keypad::setLayout(const uint8_t index) {
-	cursor = 0;
+	cursor = index; //HACK
 	
 	memcpy_P(&layout, &KEYPAD_LAYOUTS[index], sizeof(KeypadLayout));
 }

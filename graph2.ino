@@ -10,7 +10,7 @@ Tinyfont tf = Tinyfont(ab.sBuffer, Arduboy2::width(), Arduboy2::height());
 
 // I'm a heathen and I use the arduboy class in my classes.
 
-char funcText[32];
+char funcText[32] = "2*x^2+5*x";
 
 #include "Keypad/keypad.cpp"
 Keypad keypad;
@@ -21,7 +21,7 @@ Function function;
 #include "Graph/graph.cpp"
 Graph graph;
 
-uint8_t state = 0;
+uint8_t state = 1;
 
 uint8_t cursor = 0;
 bool toTheTokens = false;
@@ -33,21 +33,7 @@ void setup() {
 	
 	graph.begin();
 	
-	do {keypad.lazyFunctionEntry(funcText);} while (!function.getFunction(funcText));
-	
-	// function.constants[0] = 2.0f;
-	// function.constants[1] = 5.0f;
-	
-	// function.function[0] = TOKEN_VAR;
-	// function.function[1] = 0;
-	// function.function[2] = TOKEN_POW;
-	// function.function[3] = 0;
-	// function.function[4] = TOKEN_MUL;
-	// function.function[5] = 1;
-	// function.function[6] = TOKEN_VAR;
-	// function.function[7] = TOKEN_MUL;
-	// function.function[8] = TOKEN_ADD;
-	// function.function[9] = TOKEN_NOP;
+	function.getFunction(funcText);
 }
 
 void loop() {
@@ -70,16 +56,7 @@ void loop() {
 			}
 		}
 		if (ab.justPressed(B_BUTTON)) {
-			graph.recalculate(function);
-			
-			graph.draw();
-			ab.display();
-			for (;;) {
-				if (!ab.nextFrame()) continue;
-				ab.pollButtons();
-				if (ab.justPressed(B_BUTTON)) break;
-				ab.display();
-			}
+			state = 1;
 		}
 		
 		for (uint8_t i = 0; i < 8; i++) {
@@ -93,7 +70,39 @@ void loop() {
 		gf.setCursor(32, cursor*7);
 		gf.print(toTheTokens ? '>' : '<');
 	} else if (state == 1) {
+		if (ab.justPressed(UP_BUTTON) && cursor > 0) cursor--;
+		if (ab.justPressed(DOWN_BUTTON) && cursor < 2) cursor++;
 		
+		if (ab.justPressed(A_BUTTON)) {
+			switch (cursor) {
+				case 0:
+					do {keypad.lazyFunctionEntry(funcText);} while (!function.getFunction(funcText));
+					break;
+				case 1:
+					graph.recalculate(function);
+					graph.draw();
+					ab.display();
+					for (;;) {
+						if (!ab.nextFrame()) continue;
+						ab.pollButtons();
+						if (ab.justPressed(B_BUTTON)) break;
+						ab.display();
+					}
+					break;
+				case 2:
+					state = 0;
+					cursor = 0;
+					toTheTokens = false;
+					break;
+			}
+		}
+		
+		gf.setCursor(8, 0);
+		gf.println(F("Set function"));
+		gf.println(F("See graph"));
+		gf.println(F("See RPN debug"));
+		gf.setCursor(0, cursor * 7);
+		gf.print('>');
 	}
 	
 	ab.display();
