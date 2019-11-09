@@ -19,6 +19,9 @@
 #define KEYPAD_K_SUBTRACT 0x15
 #define KEYPAD_K_MULTIPLY 0x16
 #define KEYPAD_K_DIVISION 0x17
+#define KEYPAD_K_POWER 0x18
+#define KEYPAD_K_MODULUS 0x19
+#define KEYPAD_K_VAR 0xFC
 #define KEYPAD_K_DELETE 0xFD
 #define KEYPAD_K_CLEAR 0xFE
 #define KEYPAD_K_OK 0xFF
@@ -26,34 +29,54 @@
 struct KeypadLayout {
 	uint8_t width;
 	uint8_t height;
-	uint8_t labels[];
+	const uint8_t* labels;
 };
 
-const KeypadLayout KEYPAD_LAYOUT_NUMBER[] PROGMEM = {
-	3, 5,
-	{
-		KEYPAD_K_OK, KEYPAD_K_DELETE , KEYPAD_K_CLEAR,
-		KEYPAD_K_7 , KEYPAD_K_8      , KEYPAD_K_9    ,
-		KEYPAD_K_4 , KEYPAD_K_5      , KEYPAD_K_6    ,
-		KEYPAD_K_1 , KEYPAD_K_2      , KEYPAD_K_3    ,
-		KEYPAD_K_0 , KEYPAD_K_DECIMAL, KEYPAD_K_SIGN ,
-	}
+const uint8_t KEYPAD_LAYOUT_NUMBER[] PROGMEM = {
+	KEYPAD_K_OK, KEYPAD_K_DELETE , KEYPAD_K_CLEAR,
+	KEYPAD_K_7 , KEYPAD_K_8      , KEYPAD_K_9    ,
+	KEYPAD_K_4 , KEYPAD_K_5      , KEYPAD_K_6    ,
+	KEYPAD_K_1 , KEYPAD_K_2      , KEYPAD_K_3    ,
+	KEYPAD_K_0 , KEYPAD_K_DECIMAL, KEYPAD_K_SIGN ,
 };
 
-const KeypadLayout KEYPAD_LAYOUT_FUNCTION[] PROGMEM = {
-	5, 5,
-	{
-		KEYPAD_K_LPAREN, KEYPAD_K_RPAREN  , KEYPAD_K_OK, KEYPAD_K_DELETE , KEYPAD_K_CLEAR,
-		KEYPAD_K_LPAREN, KEYPAD_K_DIVISION, KEYPAD_K_7 , KEYPAD_K_8      , KEYPAD_K_9    ,
-		KEYPAD_K_LPAREN, KEYPAD_K_MULTIPLY, KEYPAD_K_4 , KEYPAD_K_5      , KEYPAD_K_6    ,
-		KEYPAD_K_LPAREN, KEYPAD_K_SUBTRACT, KEYPAD_K_1 , KEYPAD_K_2      , KEYPAD_K_3    ,
-		KEYPAD_K_LPAREN, KEYPAD_K_ADDITION, KEYPAD_K_0 , KEYPAD_K_DECIMAL, KEYPAD_K_SIGN ,
-	}
+const uint8_t KEYPAD_LAYOUT_FUNCTION[] PROGMEM = {
+	KEYPAD_K_LPAREN, KEYPAD_K_RPAREN  , KEYPAD_K_OK, KEYPAD_K_DELETE , KEYPAD_K_CLEAR,
+	KEYPAD_K_POWER , KEYPAD_K_DIVISION, KEYPAD_K_7 , KEYPAD_K_8      , KEYPAD_K_9    ,
+	KEYPAD_K_VAR   , KEYPAD_K_MULTIPLY, KEYPAD_K_4 , KEYPAD_K_5      , KEYPAD_K_6    ,
+	KEYPAD_K_LPAREN, KEYPAD_K_SUBTRACT, KEYPAD_K_1 , KEYPAD_K_2      , KEYPAD_K_3    ,
+	KEYPAD_K_LPAREN, KEYPAD_K_ADDITION, KEYPAD_K_0 , KEYPAD_K_DECIMAL, KEYPAD_K_SIGN ,
 };
 
-const KeypadLayout* const KEYPAD_LAYOUTS[] PROGMEM = {
-	KEYPAD_LAYOUT_NUMBER, KEYPAD_LAYOUT_FUNCTION
+const KeypadLayout KEYPAD_LAYOUTS[] PROGMEM = {
+	{3, 5, KEYPAD_LAYOUT_NUMBER},
+	{5, 5, KEYPAD_LAYOUT_FUNCTION}
 };
+
+const char* const KEYPAD_S_0 PROGMEM = "0";
+const char* const KEYPAD_S_1 PROGMEM = "1";
+const char* const KEYPAD_S_2 PROGMEM = "2";
+const char* const KEYPAD_S_3 PROGMEM = "3";
+const char* const KEYPAD_S_4 PROGMEM = "4";
+const char* const KEYPAD_S_5 PROGMEM = "5";
+const char* const KEYPAD_S_6 PROGMEM = "6";
+const char* const KEYPAD_S_7 PROGMEM = "7";
+const char* const KEYPAD_S_8 PROGMEM = "8";
+const char* const KEYPAD_S_9 PROGMEM = "9";
+const char* const KEYPAD_S_DECIMAL PROGMEM = ".";
+const char* const KEYPAD_S_SIGN PROGMEM = "-";
+const char* const KEYPAD_S_LPAREN PROGMEM = "(";
+const char* const KEYPAD_S_RPAREN PROGMEM = ")";
+const char* const KEYPAD_S_ADDITION PROGMEM = "+";
+const char* const KEYPAD_S_SUBTRACT PROGMEM = "-";
+const char* const KEYPAD_S_MULTIPLY PROGMEM = "*";
+const char* const KEYPAD_S_DIVISION PROGMEM = "/";
+const char* const KEYPAD_S_POWER PROGMEM = "^";
+const char* const KEYPAD_S_MODULUS PROGMEM = "%";
+const char* const KEYPAD_S_VAR PROGMEM = "x";
+const char* const KEYPAD_S_DELETE PROGMEM = "<-";
+const char* const KEYPAD_S_CLEAR PROGMEM = "<<";
+const char* const KEYPAD_S_OK PROGMEM = "OK";
 
 class Keypad {
 	public:
@@ -76,10 +99,11 @@ class Keypad {
 		
 	private:
 		void setLayout(const uint8_t index);
+		uint8_t getLayoutKey(const uint8_t i);
 		uint8_t getLayoutKey(const uint8_t x, const uint8_t y);
+		char* getKeyString(const uint8_t key);
 		
-		
-		uint8_t layout;
+		KeypadLayout layout;
 		
 		void press();
 		
@@ -90,9 +114,6 @@ class Keypad {
 		
 		char text[32];
 		uint8_t textLen;
-		
-		uint8_t width = 3;
-		uint8_t height = 5;
 		
 		bool submitted = false;
 };

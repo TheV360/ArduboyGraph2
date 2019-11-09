@@ -24,5 +24,5 @@ I'm still working on the UI! If you want to see how far I've come, check out [th
 # Credits
 
 * Me - UI, RPN calculator, font
-* SmileBASIC Discord - Some help with C++
+* SmileBASIC Discord - A lot of help with C++
 * snail_ - Some help with the Shunting-Yard Algorithm

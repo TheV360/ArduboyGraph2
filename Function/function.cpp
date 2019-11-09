@@ -53,11 +53,11 @@ bool Function::getFunction(const char* input) {
 		if (token == TOKEN_UNKNOWN) {
 			// Encountering a number:
 			function[outputFIndex++] = token = outputCIndex;
-			if (prevToken == TOKEN_SUB) {
-				constants[outputCIndex++] = strtod(input + i - 1, &endOfNumber);
-			} else {
+			// if (prevToken == TOKEN_SUB) {
+			// 	constants[outputCIndex++] = strtod(input + i - 1, &endOfNumber);
+			// } else {
 				constants[outputCIndex++] = strtod(input + i, &endOfNumber);
-			}
+			// }
 			if (i == endOfNumber - input) continue;
 			i = endOfNumber - input - 1;
 		} else if (isFunction(token)) {
