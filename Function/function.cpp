@@ -29,16 +29,16 @@ float Function::calculate(const float x = 0.0f) {
 		}
 	}
 	
+	if (stack.isEmpty()) return 0.0f;
 	return stack.pop();
 }
 
 bool Function::getFunction(const char* input) {
-	//return false;
 	uint8_t inputLen = 0;
 	while (input[++inputLen] != '\0');
 	
-	uint8_t prevToken = TOKEN_NOP;
-	uint8_t token;
+	uint8_t prevToken;
+	uint8_t token = TOKEN_NOP;
 	char* endOfNumber;
 	
 	StackArray<uint8_t> operators;

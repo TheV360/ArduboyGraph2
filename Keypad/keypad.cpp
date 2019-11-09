@@ -1,11 +1,28 @@
 #include "keypad.h"
 
-void Keypad::begin(const float number = 0.0f, const uint8_t digits = 2) {
+void Keypad::begin(const char* function = NULL) {
+	// Set function mode.
+	setLayout(1);
+	
 	// Reset submission status.
 	submitted = false;
 	
 	// Clear existing text, if any.
-	while (textLen > 0) text[textLen--] = '\0';
+	clear();
+	
+	// Copy string
+	if (function) strcpy(text, function);
+}
+
+void Keypad::begin(const float number = 0.0f, const uint8_t digits = 2) {
+	// Set number mode.
+	setLayout(0);
+	
+	// Reset submission status.
+	submitted = false;
+	
+	// Clear existing text, if any.
+	clear();
 	
 	// Get string from number.
 	dtostrf(number, 0, digits, text);
@@ -33,6 +50,26 @@ float Keypad::lazyNumberEntry(const float number = 0.0f, const uint8_t digits = 
 	return getValue();
 }
 
+// The lazy way to do things.
+// Entirely takes over the loop. Don't use?
+void Keypad::lazyFunctionEntry(char* function) {
+	begin(function);
+	
+	while (!submitted) {
+		if (!ab.nextFrame()) continue;
+		ab.pollButtons();
+		
+		ab.clear();
+		
+		update();
+		draw();
+		
+		ab.display();
+	}
+	
+	getValue(function);
+}
+
 // The right way to do things.
 void Keypad::update() {
 	if (ab.justPressed(LEFT_BUTTON ) && cursor > 0) cursor--;
@@ -58,8 +95,8 @@ void Keypad::draw() {
 	// Labels (tmp)
 	for (uint8_t j = 0; j < height; j++) {
 		for (uint8_t i = 0; i < width; i++) {
-			gf.setCursor(x + i*10 + 2, y + j*10 + 2);
-			gf.print((char)pgm_read_byte(KEYPAD_LABELS + i + j*width));
+			gf.setCursor(x + i*10 + 4, y + j*10 + 2);
+			// gf.print(getKeyString(getLayoutKey(i, j)));
 		}
 	}
 	
@@ -84,10 +121,31 @@ bool Keypad::isSubmitted() {
 	return submitted;
 }
 
+// Get text
+void Keypad::getValue(char* function) {
+	strcpy(function, text);
+}
+
 // Get value after everything is said and done.
 float Keypad::getValue() {
 	return atof(text);
 }
+
+// Get layout
+void Keypad::setLayout(const uint8_t index) {
+	cursor = 0;
+	layout = index;
+	
+	// KeypadLayout* kp = pgm_read_ptr(&KEYPAD_LAYOUTS[index]);
+	
+	// width = pgm_read_byte(kp.width);
+	// height = pgm_read_byte(kp.height);
+}
+
+// Get layout key
+// uint8_t Keypad::getLayoutKey(const uint8_t x, const uint8_t y) {
+// 	return ;
+// }
 
 // This is what happens when you press a button.
 void Keypad::press() {
@@ -100,15 +158,21 @@ void Keypad::press() {
 			backspace();
 			break;
 		case 2: // Bomb
-			while (textLen) text[--textLen] = '\0';
+			clear();
 			break;
 		default:
-			text[textLen++] = (char)pgm_read_byte(KEYPAD_LABELS + cursor);
+			// text[textLen++] = (char)pgm_read_byte(KEYPAD_LABELS + cursor);
 			break;
 	}
 }
 
-// And when you backspace
+// When you backspace
 void Keypad::backspace() {
 	if (textLen) text[--textLen] = '\0';
+}
+// When you backspace
+
+// Delete all
+void Keypad::clear() {
+	while (textLen) text[--textLen] = '\0';
 }

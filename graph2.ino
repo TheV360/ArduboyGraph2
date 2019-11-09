@@ -10,6 +10,8 @@ Tinyfont tf = Tinyfont(ab.sBuffer, Arduboy2::width(), Arduboy2::height());
 
 // I'm a heathen and I use the arduboy class in my classes.
 
+char funcText[32];
+
 #include "Keypad/keypad.cpp"
 Keypad keypad;
 
@@ -31,23 +33,21 @@ void setup() {
 	
 	graph.begin();
 	
-	if (!function.getFunction("2*x^2+5*x+2")) {
-		Serial.println(F("GetFunction failed! Fallback"));
-		
-		function.constants[0] = 2.0f;
-		function.constants[1] = 5.0f;
-		
-		function.function[0] = TOKEN_VAR;
-		function.function[1] = 0;
-		function.function[2] = TOKEN_POW;
-		function.function[3] = 0;
-		function.function[4] = TOKEN_MUL;
-		function.function[5] = 1;
-		function.function[6] = TOKEN_VAR;
-		function.function[7] = TOKEN_MUL;
-		function.function[8] = TOKEN_ADD;
-		function.function[9] = TOKEN_NOP;
-	}
+	do {keypad.lazyFunctionEntry(funcText);} while (!function.getFunction(funcText));
+	
+	// function.constants[0] = 2.0f;
+	// function.constants[1] = 5.0f;
+	
+	// function.function[0] = TOKEN_VAR;
+	// function.function[1] = 0;
+	// function.function[2] = TOKEN_POW;
+	// function.function[3] = 0;
+	// function.function[4] = TOKEN_MUL;
+	// function.function[5] = 1;
+	// function.function[6] = TOKEN_VAR;
+	// function.function[7] = TOKEN_MUL;
+	// function.function[8] = TOKEN_ADD;
+	// function.function[9] = TOKEN_NOP;
 }
 
 void loop() {
@@ -78,7 +78,7 @@ void loop() {
 				if (!ab.nextFrame()) continue;
 				ab.pollButtons();
 				if (ab.justPressed(B_BUTTON)) break;
-				ab.display(); // emu gets angry when this not present!!!
+				ab.display();
 			}
 		}
 		
