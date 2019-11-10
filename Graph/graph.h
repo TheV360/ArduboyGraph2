@@ -9,8 +9,6 @@ struct Window {
 
 class Graph {
 	public:
-		void begin();
-		
 		void draw(const Function function);
 		
 		int8_t graphToScreenX(const float x);
@@ -19,7 +17,7 @@ class Graph {
 		float screenToGraphX(const int8_t x);
 		float screenToGraphY(const int8_t y);
 		
-		Window window;
+		Window window = {-10.0f, 10.0f, -10.0f, 10.0f};
 	private:
 		// float data[GRAPH_WIDTH];
 		

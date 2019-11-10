@@ -1,12 +1,5 @@
 #include "graph.h"
 
-void Graph::begin() {
-	window.xMin = -10.0f;
-	window.xMax = +10.0f;
-	window.yMin = -10.0f;
-	window.yMax = +10.0f;
-}
-
 // void Graph::recalculate(const Function function) {
 // 	for (uint8_t i = 0; i < width; i++) {
 // 		data[i] = function.calculate(screenToGraphX(i));
