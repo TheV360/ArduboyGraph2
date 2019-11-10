@@ -1,8 +1,4 @@
-#ifndef GRAPHFONT_SPRITE_H
-#define GRAPHFONT_SPRITE_H
-
-#include <avr/io.h>
-#include <avr/pgmspace.h>
+#pragma once
 
 const uint8_t GRAPHFONT_ATLAS[] PROGMEM = { // Starts at 33, ends at 126
 	/**/   0,   1,   4,   7,  10,  13,  17,
@@ -53,5 +49,3 @@ const uint8_t GRAPHFONT_SPRITE[] PROGMEM = {
 	0x34, 0x4c, 0x50, 0x3c, 0x34, 0x2c, 0x04, 0x3b,
 	0x21, 0x3b, 0x21, 0x3b, 0x04, 0x02, 0x06, 0x04
 };
-
-#endif

@@ -1,13 +1,4 @@
-#ifndef GRAPHOBJ_H
-#define GRAPHOBJ_H
-
-#define GRAPH_WIDTH 63
-#define GRAPH_HEIGHT 63
-
-#define GRAPH_SHOULD_STORE
-// todo: make this do something other than make errors if removed
-
-#define GRAPH_MAX_DASH 32
+#pragma once
 
 struct Window {
 	float xMin;
@@ -20,8 +11,7 @@ class Graph {
 	public:
 		void begin();
 		
-		void recalculate(const Function function);
-		void draw();
+		void draw(const Function function);
 		
 		int8_t graphToScreenX(const float x);
 		int8_t graphToScreenY(const float y);
@@ -31,12 +21,12 @@ class Graph {
 		
 		Window window;
 	private:
-#ifdef GRAPH_SHOULD_STORE
-		float data[GRAPH_WIDTH];
-#endif
+		// float data[GRAPH_WIDTH];
+		
+		uint8_t width = 63;
+		uint8_t height = 63;
 		
 		static int8_t keepReasonable(const float n);
 		static float lerp(const float a, const float b, const float p);
+		static float invLerp(const float a, const float b, const float p);
 };
-
-#endif

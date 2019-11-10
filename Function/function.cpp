@@ -2,30 +2,59 @@
 
 float Function::calculate(const float x = 0.0f) {
 	StackArray<float> stack;
+	float left;
+	float right;
 	
 	for (uint8_t i = 0; i < FUNCTION_MAX_TOKENS; i++) {
-		if (function[i] < TOKEN_OPERATOR_START) {
+		if (isConstant(function[i])) {
 			stack.push(constants[function[i]]);
-		} else {
-			if (function[i] == TOKEN_ADD) {
-				stack.push(stack.pop() + stack.pop());
-			} else if (function[i] == TOKEN_SUB) {
-				stack.push(stack.pop() - stack.pop());
-			} else if (function[i] == TOKEN_MUL) {
-				stack.push(stack.pop() * stack.pop());
-			} else if (function[i] == TOKEN_DIV) {
-				stack.push(stack.pop() / stack.pop());
-			} else if (function[i] == TOKEN_POW) {
-				stack.push(pow(stack.pop(), stack.pop()));
-			} else if (function[i] == TOKEN_MOD) {
-				stack.push(fmod(stack.pop(), stack.pop()));
-			} else if (function[i] == TOKEN_VAR) {
-				stack.push(x);
-			} else if (function[i] == TOKEN_NEG) {
-				stack.push(-stack.pop());
-			} else {
-				break;
+		} else if (isOperator(function[i])) {
+			switch (function[i]) {
+				case TOKEN_ADD:
+					right = stack.pop(); left = stack.pop();
+					stack.push(left + right);
+					break;
+				case TOKEN_SUB:
+					right = stack.pop(); left = stack.pop();
+					stack.push(left + right);
+					break;
+				case TOKEN_MUL:
+					right = stack.pop(); left = stack.pop();
+					stack.push(left * right);
+					break;
+				case TOKEN_DIV:
+					right = stack.pop(); left = stack.pop();
+					stack.push(left / right);
+					break;
+				case TOKEN_POW:
+					right = stack.pop(); left = stack.pop();
+					stack.push(pow(left, right));
+					break;
+				case TOKEN_MOD:
+					right = stack.pop(); left = stack.pop();
+					stack.push(fmod(left, right));
+					break;
+				case TOKEN_NEG:
+					stack.push(-stack.pop());
+					break;
 			}
+		} else if (isFunction(function[i])) {
+			switch (function[i]) {
+				case TOKEN_SIN:
+					stack.push(sin(stack.pop()));
+					break;
+				case TOKEN_COS:
+					stack.push(cos(stack.pop()));
+					break;
+			}
+		} else if (function[i] != TOKEN_NOP) {
+			switch (function[i]) {
+				case TOKEN_VAR:
+					stack.push(x);
+					break;
+			}
+		} else {
+			break;
 		}
 	}
 	

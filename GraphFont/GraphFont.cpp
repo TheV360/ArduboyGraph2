@@ -102,6 +102,15 @@ void GraphFont::drawByte(int16_t x, int16_t y, uint8_t pixels, uint8_t color) {
 uint8_t GraphFont::getCharWidth(uint8_t c) {
 	return pgm_read_byte(GRAPHFONT_ATLAS + c - GRAPHFONT_ATLAS_MIN + 1) - pgm_read_byte(GRAPHFONT_ATLAS + c - GRAPHFONT_ATLAS_MIN);
 }
+uint8_t GraphFont::getCharsWidth(const char* c) {
+	uint8_t r = 0;
+	uint8_t i = 0;
+	
+	while (c[i] != '\0') r += getCharWidth(c[i++]);
+	r += letterSpacing * (i - 1);
+	
+	return r;
+}
 
 void GraphFont::setCursor(int16_t x, int16_t y) {
 	cursorX = baseX = x;

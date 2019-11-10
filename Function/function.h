@@ -1,5 +1,4 @@
-#ifndef RPNFUNCOBJ_H
-#define RPNFUNCOBJ_H
+#pragma once
 
 #define FUNCTION_MAX_TOKENS 32
 #define FUNCTION_MAX_CONST 8
@@ -9,8 +8,9 @@
 #define TOKEN_FUNCTION_START 0x80
 #define TOKEN_SPECIALS_START 0xf0
 
+// Constants
 #define TOKEN_UNKNOWN 0
-
+// Operators
 #define TOKEN_NEG 0x40 // unary minus
 #define TOKEN_ADD 0x41 // +
 #define TOKEN_SUB 0x42 // -
@@ -18,10 +18,10 @@
 #define TOKEN_DIV 0x44 // /
 #define TOKEN_POW 0x45 // ^
 #define TOKEN_MOD 0x46 // %
-
+// Functions
 #define TOKEN_SIN 0x80 // sin
 #define TOKEN_COS 0x81 // sin
-
+// Specials
 #define TOKEN_LBR 0xf0 // (
 #define TOKEN_RBR 0xf1 // )
 #define TOKEN_CE  0xfc // e
@@ -47,5 +47,3 @@ class Function {
 		bool getAssociativity(const uint8_t input);
 		uint8_t getPrecedence(const uint8_t input);
 };
-
-#endif

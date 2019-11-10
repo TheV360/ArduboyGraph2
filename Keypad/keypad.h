@@ -1,5 +1,4 @@
-#ifndef KEYPADOBJ_H
-#define KEYPADOBJ_H
+#pragma once
 
 #define KEYPAD_K_0 0x00
 #define KEYPAD_K_1 0x01
@@ -121,5 +120,3 @@ class Keypad {
 		
 		bool submitted = false;
 };
-
-#endif

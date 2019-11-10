@@ -1,5 +1,4 @@
-#ifndef GRAPHFONT_H
-#define GRAPHFONT_H
+#pragma once
 
 #include <Arduino.h>
 #include <Print.h>
@@ -75,12 +74,14 @@ class GraphFont : public Print {
 	 * Screw it, expose the getCharWidth function
 	 */
 	uint8_t getCharWidth(uint8_t c);
+	uint8_t getCharsWidth(const char* c);
+	uint8_t getCharsWidth(const __FlashStringHelper* c);
 
 	private:
 		void drawByte(int16_t x, int16_t y, uint8_t pixels, uint8_t color);
-	
-	uint8_t getCharIndex(uint8_t c);
-
+		
+		uint8_t getCharIndex(uint8_t c);
+		
 		uint8_t *sBuffer;
 		int16_t sWidth;
 		int16_t sHeight;
@@ -94,5 +95,3 @@ class GraphFont : public Print {
 		uint8_t letterSpacing;  //!< letterSpacing controls the distance between letters. Default is 1.
 		uint8_t lineHeight;     //!< lineHeight controls the height between lines breakend by \n. Default is 5.
 };
-
-#endif

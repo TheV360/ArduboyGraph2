@@ -1,30 +1,26 @@
 #include "extend.h"
 #include "GraphFont/GraphFont.cpp"
-#include <Tinyfont.h>
 
 Arduboy2Ex ab;
 GraphFont gf = GraphFont(ab.sBuffer, Arduboy2::width(), Arduboy2::height());
-Tinyfont tf = Tinyfont(ab.sBuffer, Arduboy2::width(), Arduboy2::height());
 
 #include "StackArray/StackArray.h"
 
 // I'm a heathen and I use the arduboy class in my classes.
-
-char funcText[32] = "2*x^2+5*x";
-
 #include "Keypad/keypad.cpp"
-Keypad keypad;
-
 #include "Function/function.cpp"
-Function function;
-
 #include "Graph/graph.cpp"
+
+Keypad keypad;
+Function function;
 Graph graph;
 
 uint8_t state = 1;
 
 uint8_t cursor = 0;
 bool toTheTokens = false;
+
+char funcText[32] = "2*x^2+5*x";
 
 void setup() {
 	ab.begin();
@@ -79,8 +75,7 @@ void loop() {
 					do {keypad.lazyFunctionEntry(funcText);} while (!function.getFunction(funcText));
 					break;
 				case 1:
-					graph.recalculate(function);
-					graph.draw();
+					graph.draw(function);
 					ab.display();
 					for (;;) {
 						if (!ab.nextFrame()) continue;
