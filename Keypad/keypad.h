@@ -97,6 +97,9 @@ class Keypad {
 		
 		bool isSubmitted();
 		
+		char text[32];
+		uint8_t textLen;
+		
 		uint8_t x = 12;
 		uint8_t y = 12;
 		
@@ -114,9 +117,6 @@ class Keypad {
 		void clear();
 		
 		uint8_t cursor;
-		
-		char text[32];
-		uint8_t textLen;
 		
 		bool submitted = false;
 };

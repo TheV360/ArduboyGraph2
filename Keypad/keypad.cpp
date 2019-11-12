@@ -52,6 +52,9 @@ float Keypad::lazyNumberEntry(const float number = 0.0f, const uint8_t digits = 
 		update();
 		draw();
 		
+		gf.setCursor(x + 2, y - 8);
+		gf.print(text);
+		
 		ab.display();
 	}
 	
@@ -71,6 +74,9 @@ void Keypad::lazyFunctionEntry(char* function) {
 		
 		update();
 		draw();
+		
+		gf.setCursor(x + 2, y - 8);
+		gf.print(text);
 		
 		ab.display();
 	}
@@ -119,9 +125,6 @@ void Keypad::draw() {
 		y + (cursor / layout.width) * 10 - 1,
 		13, 13, WHITE
 	);
-	
-	gf.setCursor(x + 2, y - 8);
-	gf.print(text);
 }
 
 // Because `submitted` is private.

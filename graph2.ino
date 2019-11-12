@@ -13,6 +13,7 @@ GraphFont gf = GraphFont(ab.sBuffer, Arduboy2::width(), Arduboy2::height());
 
 Keypad keypad;
 Function function;
+Function directFunction;
 Graph graph;
 
 uint8_t state = 1;
@@ -20,24 +21,37 @@ uint8_t state = 1;
 uint8_t cursor = 0;
 bool toTheTokens = false;
 
-char funcText[32] = "2*x^2+5*x";
+bool redrawMenu = true;
+bool redrawGraph = true;
+bool justEntered = true;
+
+char funcText[32] = "(x-7)(x+2)";
 
 void setup() {
 	ab.begin();
 	
 	Serial.begin(9600);
 	
-	ab.ditherScreen();
-	ab.display();
-	ab.clear();
-	
 	function.getFunction(funcText);
-	graph.draw(function);
 }
 
 void loop() {
 	if (!ab.nextFrame()) return;
 	ab.pollButtons();
+	
+	if (redrawGraph) {
+		ab.ditherScreen();
+		ab.display();
+		ab.clear();
+		
+		graph.draw(function);
+		redrawGraph = false;
+	}
+	if (justEntered) {
+		redrawMenu = true;
+		// justEntered = false;
+		// TODO: more efficient not-hacked-together menus
+	}
 	
 	if (state == 0) {
 		ab.clear();
@@ -56,6 +70,8 @@ void loop() {
 		}
 		if (ab.justPressed(B_BUTTON)) {
 			state = 1;
+			redrawGraph = true;
+			redrawMenu = true;
 		}
 		
 		for (uint8_t i = 0; i < 8; i++) {
@@ -80,50 +96,57 @@ void loop() {
 			switch (cursor) {
 				case 0:
 					do {keypad.lazyFunctionEntry(funcText);} while (!function.getFunction(funcText));
-					ab.ditherScreen();
-					ab.display();
-					ab.clear();
-					graph.draw(function);
+					redrawGraph = true;
 					break;
 				case 1:
-					state = 2;
+					state = 3;
+					break;
+				case 4:
+					state = 6;
 					break;
 				case 6:
 					state = 0;
 					break;
 			}
+			redrawMenu = true;
 			cursor = 0;
 		}
 		
-		ab.drawFastHLine(65, 0, 63);
-		ab.drawFastHLine(64, 1, 64);
-		ab.drawFastHLine(65, 63, 63);
-		
-		for (uint8_t i = 0; i < 2; i++) {
-			ab.drawFastVLine(64 + i * 32, 2, 61);
+		if (redrawMenu) {
+			ab.drawFastHLine(65, 0, 63);
+			ab.drawFastHLine(64, 1, 64);
+			ab.drawFastHLine(65, 63, 63);
+			
+			for (uint8_t i = 0; i < 2; i++) {
+				ab.drawFastVLine(64 + i * 32, 2, 61);
+			}
+			for (uint8_t j = 0; j <= 3; j++) {
+				ab.drawFastHLine(64, 2 + j * 20, 64);
+			}
+			
+			gf.setCursor(66, 4);
+			gf.print(F("Function"));
+			gf.setCursor(98, 4);
+			gf.print(F("Window"));
+			gf.setCursor(66, 24);
+			gf.print(F("Table"));
+			gf.setCursor(98, 24);
+			gf.print(F("Trace"));
+			gf.setCursor(66, 44);
+			gf.print(F("Direct"));
+			gf.setCursor(98, 44);
+			gf.print(F("Tools"));
+			
+			ab.drawFastHLine(65 + (cursor % 2) * 32, 2 + (cursor / 2) * 20, 31, BLACK);
+			ab.drawFastHLine(65 + (cursor % 2) * 32, 22 + (cursor / 2) * 20, 31, BLACK);
+			ab.drawFastHLine(65 + (cursor % 2) * 32, 1 + (cursor / 2) * 20, 32);
+			ab.drawFastHLine(65 + (cursor % 2) * 32, 23 + (cursor / 2) * 20, 32);
+			
+			redrawMenu = false;
 		}
-		for (uint8_t j = 0; j <= 3; j++) {
-			ab.drawFastHLine(64, 2 + j * 20, 64);
-		}
-		
-		gf.setCursor(66, 4);
-		gf.print(F("Function"));
-		gf.setCursor(98, 4);
-		gf.print(F("Window"));
-		gf.setCursor(66, 24);
-		gf.print(F("Table"));
-		gf.setCursor(98, 24);
-		gf.print(F("Trace"));
-		gf.setCursor(66, 44);
-		gf.print(F("Direct"));
-		gf.setCursor(98, 44);
-		gf.print(F("Tools"));
-		
-		ab.drawFastHLine(65 + (cursor % 2) * 32, 2 + (cursor / 2) * 20, 31, BLACK);
-		ab.drawFastHLine(65 + (cursor % 2) * 32, 22 + (cursor / 2) * 20, 31, BLACK);
-		ab.drawFastHLine(65 + (cursor % 2) * 32, 1 + (cursor / 2) * 20, 32);
-		ab.drawFastHLine(65 + (cursor % 2) * 32, 23 + (cursor / 2) * 20, 32);
 	} else if (state == 2) {
+		
+	} else if (state == 3) {
 		ab.fillRect(64, 0, 64, 64, BLACK);
 		
 		if (ab.justPressed(UP_BUTTON) && cursor > 0) cursor--;
@@ -146,26 +169,26 @@ void loop() {
 			}
 		}
 		if (ab.justPressed(B_BUTTON)) {
-			ab.ditherScreen();
-			ab.display();
-			ab.clear();
-			graph.draw(function);
+			redrawGraph = true;
+			redrawMenu = true;
 			state = 1;
 			cursor = 0;
 		}
 		
 		gf.setCursor(72, 4);
-		gf.println(F("x min"));
+		gf.print(F("Xmin"));
 		gf.println(graph.window.xMin, 3);
-		gf.println(F("x max"));
+		gf.print(F("Xmax"));
 		gf.println(graph.window.xMax, 3);
-		gf.println(F("y min"));
+		gf.print(F("Ymin"));
 		gf.println(graph.window.yMin, 3);
-		gf.println(F("y max"));
+		gf.print(F("Ymax"));
 		gf.println(graph.window.yMax, 3);
 		
-		gf.setCursor(66, 4 + cursor * 14);
+		gf.setCursor(66, 4 + cursor * 7);
 		gf.print('>');
+	} else if (state == 6) {
+		
 	}
 	
 	ab.display();

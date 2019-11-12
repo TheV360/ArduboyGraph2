@@ -16,7 +16,7 @@ float Function::calculate(const float x = 0.0f) {
 					break;
 				case TOKEN_SUB:
 					right = stack.pop(); left = stack.pop();
-					stack.push(left + right);
+					stack.push(left - right);
 					break;
 				case TOKEN_MUL:
 					right = stack.pop(); left = stack.pop();
@@ -79,23 +79,19 @@ bool Function::getFunction(const char* input) {
 		prevToken = token;
 		token = getToken(input[i]);
 		
+		// Implicit multiplication
+		if ((isValue(prevToken) || prevToken == TOKEN_RBR)
+		&& (isValue(token) || isFunction(token) || token == TOKEN_LBR)) {
+			operators.push(TOKEN_MUL);
+		}
+		
 		if (token == TOKEN_UNKNOWN) {
-			// Encountering a number:
 			function[outputFIndex++] = token = outputCIndex;
-			// if (prevToken == TOKEN_SUB) {
-			// 	constants[outputCIndex++] = strtod(input + i - 1, &endOfNumber);
-			// } else {
-				constants[outputCIndex++] = strtod(input + i, &endOfNumber);
-			// }
-			if (i == endOfNumber - input) continue;
-			i = endOfNumber - input - 1;
+			constants[outputCIndex++] = strtod(input + i, &endOfNumber);
+			if (i != endOfNumber - input) i = endOfNumber - input - 1;
 		} else if (isFunction(token)) {
 			operators.push(token);
 		} else if (isOperator(token)) {
-			if (token == TOKEN_SUB && isOperator(prevToken) || prevToken == TOKEN_RBR) {
-				token = TOKEN_NEG;
-			}
-			
 			// Hopefully this is more readable.
 			while (
 				operators.count() && (
@@ -112,8 +108,6 @@ bool Function::getFunction(const char* input) {
 			operators.push(token);
 		} else if (token == TOKEN_LBR) {
 			operators.push(token);
-			// if (prevToken == TOKEN_RBR || prevToken < TOKEN_OPERATOR_START)
-			// todo
 		} else if (token == TOKEN_RBR) {
 			while (operators.count() && operators.peek() != TOKEN_LBR) {
 				function[outputFIndex++] = operators.pop();
@@ -152,15 +146,19 @@ uint8_t Function::getToken(const char input) {
 }
 
 bool Function::isConstant(const uint8_t input) {
+	return input >= TOKEN_CONSTANT_START && input < TOKEN_VARIABLE_START;
+}
+bool Function::isValue(const uint8_t input) {
 	return input >= TOKEN_CONSTANT_START && input < TOKEN_OPERATOR_START;
 }
-
 bool Function::isOperator(const uint8_t input) {
 	return input >= TOKEN_OPERATOR_START && input < TOKEN_FUNCTION_START;
 }
-
 bool Function::isFunction(const uint8_t input) {
-	return input >= TOKEN_FUNCTION_START && input < TOKEN_SPECIALS_START;
+	return input >= TOKEN_FUNCTION_START && input < TOKEN_SPECIAL_START;
+}
+bool Function::isSpecial(const uint8_t input) {
+	return input >= TOKEN_SPECIAL_START;
 }
 
 bool Function::getAssociativity(const uint8_t input) {
