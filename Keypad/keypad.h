@@ -20,6 +20,7 @@
 #define KEYPAD_K_DIVISION 0x17
 #define KEYPAD_K_POWER 0x18
 #define KEYPAD_K_MODULUS 0x19
+#define KEYPAD_K_SINE 0x20
 // #define KEYPAD_K_E 0xFA
 // #define KEYPAD_K_PI 0xFB
 #define KEYPAD_K_VAR 0xFC
@@ -45,7 +46,7 @@ const uint8_t KEYPAD_LAYOUT_FUNCTION[] PROGMEM = {
 	KEYPAD_K_LPAREN , KEYPAD_K_OK, KEYPAD_K_DELETE , KEYPAD_K_CLEAR, KEYPAD_K_POWER   ,
 	KEYPAD_K_RPAREN , KEYPAD_K_7 , KEYPAD_K_8      , KEYPAD_K_9    , KEYPAD_K_DIVISION,
 	KEYPAD_K_MODULUS, KEYPAD_K_4 , KEYPAD_K_5      , KEYPAD_K_6    , KEYPAD_K_MULTIPLY,
-	KEYPAD_K_VAR    , KEYPAD_K_1 , KEYPAD_K_2      , KEYPAD_K_3    , KEYPAD_K_SUBTRACT,
+	KEYPAD_K_SINE   , KEYPAD_K_1 , KEYPAD_K_2      , KEYPAD_K_3    , KEYPAD_K_SUBTRACT,
 	KEYPAD_K_VAR    , KEYPAD_K_0 , KEYPAD_K_DECIMAL, KEYPAD_K_SIGN , KEYPAD_K_ADDITION,
 };
 
@@ -77,16 +78,17 @@ const char* const KEYPAD_S_MODULUS PROGMEM = "%";
 // const char* const KEYPAD_S_E PROGMEM = "E";
 // const char* const KEYPAD_S_PI PROGMEM = "p";
 const char* const KEYPAD_S_VAR PROGMEM = "x";
+const char* const KEYPAD_S_SINE PROGMEM = "s(";
 const char* const KEYPAD_S_DELETE PROGMEM = "<-";
 const char* const KEYPAD_S_CLEAR PROGMEM = "<<";
 const char* const KEYPAD_S_OK PROGMEM = "OK";
 
 class Keypad {
 	public:
-		void begin(const char* function);
+		void begin(const char* function = NULL);
 		void begin(const float number, const uint8_t digits);
 		
-		void lazyFunctionEntry(char* function);
+		void lazyFunctionEntry(char* function = NULL);
 		float lazyNumberEntry(const float number, const uint8_t digits);
 		
 		void update();

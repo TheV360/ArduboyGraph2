@@ -4,7 +4,9 @@
 Arduboy2Ex ab;
 GraphFont gf = GraphFont(ab.sBuffer, Arduboy2::width(), Arduboy2::height());
 
+#include "AlertBox/AlertBox.h"
 #include "StackArray/StackArray.h"
+#include "Icons/Icons.h"
 
 // I'm a heathen and I use the arduboy class in my classes.
 #include "Keypad/keypad.cpp"
@@ -25,12 +27,14 @@ bool redrawMenu = true;
 bool redrawGraph = true;
 bool justEntered = true;
 
-char funcText[32] = "(x-7)(x+2)";
+char funcText[32] = "5s(x)";
+char directText[32] = "2+2";
+
+float table[2][5];
+float directResult;
 
 void setup() {
 	ab.begin();
-	
-	Serial.begin(9600);
 	
 	function.getFunction(funcText);
 }
@@ -69,9 +73,9 @@ void loop() {
 			}
 		}
 		if (ab.justPressed(B_BUTTON)) {
-			state = 1;
 			redrawGraph = true;
 			redrawMenu = true;
+			state = 1;
 		}
 		
 		for (uint8_t i = 0; i < 8; i++) {
@@ -85,7 +89,7 @@ void loop() {
 		gf.setCursor(32, cursor*7);
 		gf.print(toTheTokens ? '>' : '<');
 	} else if (state == 1) {
-		ab.fillRect(64, 0, 64, 64, BLACK);
+		ab.fastRect(64, 0, 64, 8, BLACK);
 		
 		if (ab.justPressed(UP_BUTTON) && cursor >= 2) cursor -= 2;
 		if (ab.justPressed(DOWN_BUTTON) && cursor <= 3) cursor += 2;
@@ -95,8 +99,7 @@ void loop() {
 		if (ab.justPressed(A_BUTTON)) {
 			switch (cursor) {
 				case 0:
-					do {keypad.lazyFunctionEntry(funcText);} while (!function.getFunction(funcText));
-					redrawGraph = true;
+					state = 2;
 					break;
 				case 1:
 					state = 3;
@@ -137,16 +140,51 @@ void loop() {
 			gf.setCursor(98, 44);
 			gf.print(F("Tools"));
 			
+			for (uint8_t i = 0; i < 6; i++) {
+				Icons::drawIcon(i, 87 + (i % 2) * 32, 13 + (i / 2) * 20);
+			}
+			
 			ab.drawFastHLine(65 + (cursor % 2) * 32, 2 + (cursor / 2) * 20, 31, BLACK);
 			ab.drawFastHLine(65 + (cursor % 2) * 32, 22 + (cursor / 2) * 20, 31, BLACK);
 			ab.drawFastHLine(65 + (cursor % 2) * 32, 1 + (cursor / 2) * 20, 32);
 			ab.drawFastHLine(65 + (cursor % 2) * 32, 23 + (cursor / 2) * 20, 32);
 			
+			for (uint8_t i = 0; i < 3; i++) {
+				ab.drawFastVLine(65 + i + (cursor % 2) * 32, 20 + i + (cursor / 2) * 20, 3 - i);
+				ab.drawFastVLine(93 + i + (cursor % 2) * 32, 2 + (cursor / 2) * 20, i + 1);
+			}
+			
 			redrawMenu = false;
 		}
-	} else if (state == 2) {
+	} else if (state == 2) { // Function entry
+		ab.fastRect(64, 0, 64, 8, BLACK);
 		
-	} else if (state == 3) {
+		if (justEntered) {
+			keypad.x = 76;
+			keypad.y = 12;
+			keypad.begin(funcText);
+			justEntered = false;
+		}
+		
+		keypad.update();
+		if (keypad.isSubmitted()) {
+			ErrorType error = function.getFunction(keypad.text);
+			if (error == ErrorType::OK) {
+				keypad.getValue(funcText);
+				redrawGraph = true;
+				justEntered = true;
+				state = 1;
+			} else {
+				lazierShowError(error);
+				justEntered = true; // lazy
+			}
+		}
+		
+		gf.setCursor(64, 0);
+		gf.println(keypad.text);
+		
+		keypad.draw();
+	} else if (state == 3) { // Window
 		ab.fillRect(64, 0, 64, 64, BLACK);
 		
 		if (ab.justPressed(UP_BUTTON) && cursor > 0) cursor--;
@@ -167,9 +205,9 @@ void loop() {
 					graph.window.yMax = keypad.lazyNumberEntry(graph.window.yMax, 3);
 					break;
 			}
+			redrawGraph = true;
 		}
 		if (ab.justPressed(B_BUTTON)) {
-			redrawGraph = true;
 			redrawMenu = true;
 			state = 1;
 			cursor = 0;
@@ -187,8 +225,42 @@ void loop() {
 		
 		gf.setCursor(66, 4 + cursor * 7);
 		gf.print('>');
-	} else if (state == 6) {
+	} else if (state == 4) {
 		
+	} else if (state == 6) {
+		keypad.lazyFunctionEntry(NULL);
+		if (keypad.textLen) {
+			ErrorType error = directFunction.getFunction(keypad.text);
+			if (error == ErrorType::OK) {
+				error = directFunction.calculate(0.0f, directResult);
+				if (error == ErrorType::OK) {
+					state = 60;
+				} else {
+					lazierShowError(error);
+				}
+			} else {
+				lazierShowError(error);
+			}
+		} else {
+			state = 1;
+			redrawGraph = true;
+			justEntered = true;
+		}
+	} else if (state == 60) {
+		ab.clear();
+		
+		if (ab.justPressed(A_BUTTON)) {
+			state = 6;
+		}
+		if (ab.justPressed(B_BUTTON)) {
+			state = 1;
+			redrawGraph = true;
+			justEntered = true;
+		}
+		
+		gf.setCursor(0, 0);
+		gf.println(keypad.text);
+		gf.println(directResult);
 	}
 	
 	ab.display();

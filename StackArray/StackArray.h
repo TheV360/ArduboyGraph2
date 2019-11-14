@@ -213,7 +213,8 @@ uint8_t StackArray<T>::count() const {
 
 template<typename T>
 void StackArray<T>::exit(const __FlashStringHelper * m) const {
-	Serial.println(m);
+	// Serial.println(m);
+	AlertBox::lazyAlertBox(0, 0, WIDTH, HEIGHT/8, m);
 	for (;;);
 }
 

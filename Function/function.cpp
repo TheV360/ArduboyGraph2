@@ -1,6 +1,6 @@
 #include "function.h"
 
-float Function::calculate(const float x = 0.0f) {
+ErrorType Function::calculate(const float x, float &result) {
 	StackArray<float> stack;
 	float left;
 	float right;
@@ -9,6 +9,10 @@ float Function::calculate(const float x = 0.0f) {
 		if (isConstant(function[i])) {
 			stack.push(constants[function[i]]);
 		} else if (isOperator(function[i])) {
+			if (getParameters(function[i]) > stack.count()) {
+				return ErrorType::NOT_ENOUGH_PARAMETERS;
+			}
+			
 			switch (function[i]) {
 				case TOKEN_ADD:
 					right = stack.pop(); left = stack.pop();
@@ -39,6 +43,10 @@ float Function::calculate(const float x = 0.0f) {
 					break;
 			}
 		} else if (isFunction(function[i])) {
+			if (!stack.count()) {
+				return ErrorType::NOT_ENOUGH_PARAMETERS;
+			}
+			
 			switch (function[i]) {
 				case TOKEN_SIN:
 					stack.push(sin(stack.pop()));
@@ -58,11 +66,15 @@ float Function::calculate(const float x = 0.0f) {
 		}
 	}
 	
-	if (stack.isEmpty()) return 0.0f;
-	return stack.pop();
+	if (stack.isEmpty()) {
+		result = 0.0f;
+	} else {
+		result = stack.pop();
+	}
+	return ErrorType::OK;
 }
 
-bool Function::getFunction(const char* input) {
+ErrorType Function::getFunction(const char* input) {
 	uint8_t inputLen = 0;
 	while (input[++inputLen] != '\0');
 	
@@ -92,18 +104,23 @@ bool Function::getFunction(const char* input) {
 		} else if (isFunction(token)) {
 			operators.push(token);
 		} else if (isOperator(token)) {
-			// Hopefully this is more readable.
-			while (
-				operators.count() && (
-					isFunction(operators.peek()) || (
-						isOperator(operators.peek()) && (
-							getPrecedence(operators.peek()) > getPrecedence(token) ||
-							getPrecedence(operators.peek()) == getPrecedence(token) && !getAssociativity(operators.peek())
-						) && operators.peek() != TOKEN_LBR
+			if (operators.count()) {
+				uint8_t nextToken = operators.peek();
+				while (
+					isFunction(nextToken) || (
+						isOperator(nextToken) && (
+							getPrecedence(nextToken) > getPrecedence(token) ||
+							getPrecedence(nextToken) == getPrecedence(token) && !getAssociativity(nextToken)
+						)
 					)
-				)
-			) {
-				function[outputFIndex++] = operators.pop();
+				) {
+					function[outputFIndex++] = operators.pop();
+					if (operators.count()) {
+						nextToken = operators.peek();
+					} else {
+						break;
+					}
+				}
 			}
 			operators.push(token);
 		} else if (token == TOKEN_LBR) {
@@ -113,7 +130,7 @@ bool Function::getFunction(const char* input) {
 				function[outputFIndex++] = operators.pop();
 			}
 			if (operators.isEmpty()) {
-				return false;
+				return ErrorType::PARENTHESIS_MISMATCH;
 			} else {
 				operators.pop();
 			}
@@ -123,10 +140,18 @@ bool Function::getFunction(const char* input) {
 		}
 	}
 	
-	while (operators.count()) function[outputFIndex++] = operators.pop();
+	while (operators.count()) {
+		function[outputFIndex] = operators.pop();
+		if (function[outputFIndex] == TOKEN_LBR) return ErrorType::PARENTHESIS_MISMATCH;
+		outputFIndex++;
+	}
 	function[outputFIndex++] = TOKEN_NOP;
 	
-	return true;
+	// for (uint8_t i = 0; i < FUNCTION_MAX_TOKENS; i++) {
+	// 	Serial.println(function[i], HEX);
+	// }
+	
+	return ErrorType::OK;
 }
 
 uint8_t Function::getToken(const char input) {
@@ -141,6 +166,8 @@ uint8_t Function::getToken(const char input) {
 		case  ')': return TOKEN_RBR;
 		case  'x': return TOKEN_VAR;
 		case '\0': return TOKEN_NOP;
+		case  's': return TOKEN_SIN;
+		case  'c': return TOKEN_COS;
 		default  : return TOKEN_UNKNOWN;
 	}
 }
@@ -188,5 +215,19 @@ uint8_t Function::getPrecedence(const uint8_t input) {
 			return 4;
 		case TOKEN_NEG:
 			return 5;
+	}
+}
+
+uint8_t Function::getParameters(const uint8_t input) {
+	switch (input) {
+		case TOKEN_ADD:
+		case TOKEN_SUB:
+		case TOKEN_MUL:
+		case TOKEN_DIV:
+		case TOKEN_MOD:
+		case TOKEN_POW:
+			return 2;
+		case TOKEN_NEG:
+			return 1;
 	}
 }

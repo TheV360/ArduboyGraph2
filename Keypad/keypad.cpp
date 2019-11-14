@@ -11,7 +11,7 @@ void Keypad::begin(const char* function = NULL) {
 	clear();
 	
 	// If we got a function...
-	if (function) {
+	if (function != NULL) {
 		// Copy string
 		strcpy(text, function);
 		// Get length.
@@ -63,7 +63,7 @@ float Keypad::lazyNumberEntry(const float number = 0.0f, const uint8_t digits = 
 
 // The lazy way to do things.
 // Entirely takes over the loop. Don't use?
-void Keypad::lazyFunctionEntry(char* function) {
+void Keypad::lazyFunctionEntry(char* function = NULL) {
 	begin(function);
 	
 	while (!submitted) {
@@ -81,7 +81,9 @@ void Keypad::lazyFunctionEntry(char* function) {
 		ab.display();
 	}
 	
-	getValue(function);
+	if (function != NULL) {
+		getValue(function);
+	}
 }
 
 // The right way to do things.
@@ -181,6 +183,7 @@ char* Keypad::getKeyString(const uint8_t key) {
 		case KEYPAD_K_POWER: return KEYPAD_S_POWER;
 		case KEYPAD_K_MODULUS: return KEYPAD_S_MODULUS;
 		case KEYPAD_K_VAR: return KEYPAD_S_VAR;
+		case KEYPAD_K_SINE: return KEYPAD_S_SINE;
 		case KEYPAD_K_DELETE: return KEYPAD_S_DELETE;
 		case KEYPAD_K_CLEAR: return KEYPAD_S_CLEAR;
 		case KEYPAD_K_OK: return KEYPAD_S_OK;
@@ -203,7 +206,11 @@ void Keypad::press() {
 			clear();
 			break;
 		default:
-			text[textLen++] = getKeyString(key)[0];
+			uint8_t i = 0;
+			while (true) {
+				text[textLen++] = getKeyString(key)[i++];
+				if (getKeyString(key)[i] == '\0') break;
+			}
 			break;
 	}
 }

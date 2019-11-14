@@ -31,14 +31,32 @@
 #define TOKEN_RBR 0xf1 // )
 #define TOKEN_NOP 0xff // stop reading
 
+enum class ErrorType : uint8_t {
+	OK,
+	PARENTHESIS_MISMATCH,
+	NOT_ENOUGH_PARAMETERS
+};
+
+const char ERROR_0[] PROGMEM = "Wait...";
+const char ERROR_1[] PROGMEM = "Brackets mismatch";
+const char ERROR_2[] PROGMEM = "Syntax Error";
+
+const char* const ERRORS[] PROGMEM = {
+	ERROR_0, ERROR_1, ERROR_2
+};
+
+void lazierShowError(ErrorType error) {
+	AlertBox::lazyAlertBox(0, 0, WIDTH/2, HEIGHT/8, static_cast<__FlashStringHelper*>(pgm_read_ptr(&ERRORS[static_cast<uint8_t>(error)])));
+}
+
 class Function {
 	public:
 		uint8_t function[FUNCTION_MAX_TOKENS];
 		float constants[FUNCTION_MAX_CONST];
 		
-		float calculate(const float x);
+		ErrorType calculate(const float x, float &result);
 		
-		bool getFunction(const char* input);
+		ErrorType getFunction(const char* input);
 	private:
 		uint8_t getToken(const char input);
 		
@@ -50,4 +68,5 @@ class Function {
 		
 		bool getAssociativity(const uint8_t input);
 		uint8_t getPrecedence(const uint8_t input);
+		uint8_t getParameters(const uint8_t input);
 };
