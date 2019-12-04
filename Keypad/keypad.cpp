@@ -109,10 +109,12 @@ void Keypad::draw() {
 	}
 	
 	// Labels (tmp)
+	char* keyString;
 	for (uint8_t j = 0; j < layout.height; j++) {
 		for (uint8_t i = 0; i < layout.width; i++) {
-			gf.setCursor(x + i*10 + 2, y + j*10 + 2);
-			gf.print(getKeyString(getLayoutKey(i, j)));
+			keyString = getKeyString(getLayoutKey(i, j));
+			gf.setCursor(x + i*10 + 2 + (8 - gf.getCharsWidth(keyString)) / 2, y + j*10 + 2);
+			gf.print(keyString);
 		}
 	}
 	

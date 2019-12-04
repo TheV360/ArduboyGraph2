@@ -5,6 +5,9 @@ ErrorType Function::calculate(const float x, float &result) {
 	float left;
 	float right;
 	
+	// Probably rude, but ok
+	result = NAN;
+	
 	for (uint8_t i = 0; i < FUNCTION_MAX_TOKENS; i++) {
 		if (isConstant(function[i])) {
 			stack.push(constants[function[i]]);
@@ -146,10 +149,6 @@ ErrorType Function::getFunction(const char* input) {
 		outputFIndex++;
 	}
 	function[outputFIndex++] = TOKEN_NOP;
-	
-	// for (uint8_t i = 0; i < FUNCTION_MAX_TOKENS; i++) {
-	// 	Serial.println(function[i], HEX);
-	// }
 	
 	return ErrorType::OK;
 }

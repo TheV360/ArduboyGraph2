@@ -75,7 +75,7 @@ class GraphFont : public Print {
 	 */
 	uint8_t getCharWidth(uint8_t c);
 	uint8_t getCharsWidth(const char* c);
-	uint8_t getCharsWidth(const __FlashStringHelper* c);
+	uint8_t getCharsWidth(const __FlashStringHelper** c);
 
 	private:
 		void drawByte(int16_t x, int16_t y, uint8_t pixels, uint8_t color);

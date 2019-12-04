@@ -93,10 +93,6 @@ void GraphFont::drawByte(int16_t x, int16_t y, uint8_t pixels, uint8_t color) {
 		drawByte(x, row*8, pixels << d, color);
 		drawByte(x, (row+1)*8, pixels >> (8-d), color);
 	}
-	
-	// if (((uint8_t)y) % 8 == 0) {
-	// 	sBuffer[];
-	// }
 }
 
 uint8_t GraphFont::getCharWidth(uint8_t c) {
@@ -107,6 +103,21 @@ uint8_t GraphFont::getCharsWidth(const char* c) {
 	uint8_t i = 0;
 	
 	while (c[i] != '\0') r += getCharWidth(c[i++]);
+	r += letterSpacing * (i - 1);
+	
+	return r;
+}
+uint8_t GraphFont::getCharsWidth(const __FlashStringHelper** c) {
+	uint8_t r = 0;
+	uint8_t i = 0;
+	
+	char d = pgm_read_byte(c + i);
+	
+	while (d != '\0') {
+		r += getCharWidth(d);
+		d = pgm_read_byte(c + ++i);
+	}
+	
 	r += letterSpacing * (i - 1);
 	
 	return r;

@@ -8,15 +8,17 @@ GraphFont gf = GraphFont(ab.sBuffer, Arduboy2::width(), Arduboy2::height());
 #include "StackArray/StackArray.h"
 #include "Icons/Icons.h"
 
-// I'm a heathen and I use the arduboy class in my classes.
+// I'm a heathen and I use public variables in my classes.
 #include "Keypad/keypad.cpp"
 #include "Function/function.cpp"
 #include "Graph/graph.cpp"
+#include "Table/table.cpp"
 
 Keypad keypad;
 Function function;
 Function directFunction;
 Graph graph;
+Table table;
 
 uint8_t state = 1;
 
@@ -30,13 +32,14 @@ bool justEntered = true;
 char funcText[32] = "5s(x)";
 char directText[32] = "2+2";
 
-float table[2][5];
+uint8_t traceCursor;
 float directResult;
 
 void setup() {
 	ab.begin();
 	
 	function.getFunction(funcText);
+	table.reset();
 }
 
 void loop() {
@@ -49,6 +52,7 @@ void loop() {
 		ab.clear();
 		
 		graph.draw(function);
+		table.calculate(function);
 		redrawGraph = false;
 	}
 	if (justEntered) {
@@ -104,6 +108,9 @@ void loop() {
 				case 1:
 					state = 3;
 					break;
+				case 2:
+					state = 4;
+					break;
 				case 4:
 					state = 6;
 					break;
@@ -132,7 +139,7 @@ void loop() {
 			gf.setCursor(98, 4);
 			gf.print(F("Window"));
 			gf.setCursor(66, 24);
-			gf.print(F("Table\ntodo"));
+			gf.print(F("Table"));
 			gf.setCursor(98, 24);
 			gf.print(F("Trace\ntodo"));
 			gf.setCursor(66, 44);
@@ -141,8 +148,7 @@ void loop() {
 			gf.print(F("Tools\ntodo"));
 			
 			for (uint8_t i = 0; i < 6; i++) {
-				if (i!=2 && i!=3 && i!=5)
-					Icons::drawIcon(i, 87 + (i % 2) * 32, 13 + (i / 2) * 20);
+				Icons::drawIcon(i, 87 + (i % 2) * 32, 13 + (i / 2) * 20);
 			}
 			
 			ab.drawFastHLine(65 + (cursor % 2) * 32, 2 + (cursor / 2) * 20, 31, BLACK);
@@ -181,12 +187,13 @@ void loop() {
 			}
 		}
 		
-		gf.setCursor(64, 0);
+		ab.drawRect(64, 0, 64, 11);
+		gf.setCursor(66, 2);
 		gf.println(keypad.text);
 		
 		keypad.draw();
 	} else if (state == 3) { // Window
-		ab.fillRect(64, 0, 64, 64, BLACK);
+		ab.fastRect(64, 0, 64, 8, BLACK);
 		
 		if (ab.justPressed(UP_BUTTON) && cursor > 0) cursor--;
 		if (ab.justPressed(DOWN_BUTTON) && cursor < 3) cursor++;
@@ -226,8 +233,34 @@ void loop() {
 		
 		gf.setCursor(66, 4 + cursor * 7);
 		gf.print('>');
-	} else if (state == 4) {
+	} else if (state == 4) { // Table
+		ab.fastRect(64, 0, 64, 8, BLACK);
 		
+		if (ab.justPressed(UP_BUTTON)) table.scrollUp(function);
+		if (ab.justPressed(DOWN_BUTTON)) table.scrollDown(function);
+		
+		if (ab.justPressed(A_BUTTON)) {
+			table.deltaX = keypad.lazyNumberEntry(table.deltaX, 3);
+			table.calculate(function);
+		}
+		if (ab.justPressed(B_BUTTON)) {
+			redrawMenu = true;
+			state = 1;
+			cursor = 0;
+		}
+		
+		table.draw();
+	} else if (state == 5) { // Trace
+		ab.fastRect(64, 0, 64, 8, BLACK);
+		
+		ab.fastRect(traceCursor, 0, 1, 8, INVERT);
+		
+		if (ab.justPressed(B_BUTTON)) {
+			ab.fastRect(traceCursor, 0, 1, 8, INVERT);
+			redrawMenu = true;
+			state = 1;
+			cursor = 0;
+		}
 	} else if (state == 6) {
 		keypad.lazyFunctionEntry(NULL);
 		if (keypad.textLen) {

@@ -31,36 +31,36 @@ public:
 		if (y + h - 1 >= HEIGHT/8) return;
 		
 		if (color == BLACK) {
-			for (uint8_t j = 0; j < h; j++) {
-				for (uint8_t i = 0; i < w; i++) {
+			for (uint8_t i = 0; i < w; i++) {
+				for (uint8_t j = 0; j < h; j++) {
 					sBuffer[x + i + (y + j)*WIDTH] = 0;
 				}
 			}
 		} else if (color == WHITE) {
-			for (uint8_t j = 0; j < h; j++) {
-				for (uint8_t i = 0; i < w; i++) {
+			for (uint8_t i = 0; i < w; i++) {
+				for (uint8_t j = 0; j < h; j++) {
 					sBuffer[x + i + (y + j)*WIDTH] = 0xff;
 				}
 			}
 		} else if (color == INVERT) {
-			for (uint8_t j = 0; j < h; j++) {
-				for (uint8_t i = 0; i < w; i++) {
+			for (uint8_t i = 0; i < w; i++) {
+				for (uint8_t j = 0; j < h; j++) {
 					sBuffer[x + i + (y + j)*WIDTH] ^= 0xff;
 				}
 			}
 		} else if (color == DITHER) {
-			for (uint8_t j = 0; j < h; j++) {
-				for (uint8_t i = 0; i < w; i++) {
+			for (uint8_t i = 0; i < w; i++) {
+				for (uint8_t j = 0; j < h; j++) {
 					sBuffer[x + i + (y + j)*WIDTH] = color;
-					color = ~color;
 				}
+				color = ~color;
 			}
 		} else {
-			for (uint8_t j = 0; j < h; j++) {
-				for (uint8_t i = 0; i < w; i++) {
+			for (uint8_t i = 0; i < w; i++) {
+				for (uint8_t j = 0; j < h; j++) {
 					sBuffer[x + i + (y + j)*WIDTH] &= color;
-					color = (color << 1) | (color >> 7);
 				}
+				color = (color << 1) | (color >> 7);
 			}
 		}
 	};
