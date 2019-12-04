@@ -1,6 +1,7 @@
 #include <Arduboy2.h>
 
-#define DITHER 3
+#define DITHER 0b01010101
+#define STRIPES 0b011001100
 
 class Arduboy2Ex : public Arduboy2Base {
 public:
@@ -29,19 +30,36 @@ public:
 		if (x + w - 1 >= WIDTH) return;
 		if (y + h - 1 >= HEIGHT/8) return;
 		
-		if (color == DITHER) color = 0b01010101;
-		
-		for (uint8_t j = 0; j < h; j++) {
-			for (uint8_t i = 0; i < w; i++) {
-				if (color == BLACK) {
+		if (color == BLACK) {
+			for (uint8_t j = 0; j < h; j++) {
+				for (uint8_t i = 0; i < w; i++) {
 					sBuffer[x + i + (y + j)*WIDTH] = 0;
-				} else if (color == WHITE) {
+				}
+			}
+		} else if (color == WHITE) {
+			for (uint8_t j = 0; j < h; j++) {
+				for (uint8_t i = 0; i < w; i++) {
 					sBuffer[x + i + (y + j)*WIDTH] = 0xff;
-				} else if (color == INVERT) {
+				}
+			}
+		} else if (color == INVERT) {
+			for (uint8_t j = 0; j < h; j++) {
+				for (uint8_t i = 0; i < w; i++) {
 					sBuffer[x + i + (y + j)*WIDTH] ^= 0xff;
-				} else {
-					sBuffer[x + i + (y + j)*WIDTH] &= color;
+				}
+			}
+		} else if (color == DITHER) {
+			for (uint8_t j = 0; j < h; j++) {
+				for (uint8_t i = 0; i < w; i++) {
+					sBuffer[x + i + (y + j)*WIDTH] = color;
 					color = ~color;
+				}
+			}
+		} else {
+			for (uint8_t j = 0; j < h; j++) {
+				for (uint8_t i = 0; i < w; i++) {
+					sBuffer[x + i + (y + j)*WIDTH] &= color;
+					color = (color << 1) | (color >> 7);
 				}
 			}
 		}

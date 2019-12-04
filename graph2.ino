@@ -132,16 +132,17 @@ void loop() {
 			gf.setCursor(98, 4);
 			gf.print(F("Window"));
 			gf.setCursor(66, 24);
-			gf.print(F("Table"));
+			gf.print(F("Table\ntodo"));
 			gf.setCursor(98, 24);
-			gf.print(F("Trace"));
+			gf.print(F("Trace\ntodo"));
 			gf.setCursor(66, 44);
 			gf.print(F("Direct"));
 			gf.setCursor(98, 44);
-			gf.print(F("Tools"));
+			gf.print(F("Tools\ntodo"));
 			
 			for (uint8_t i = 0; i < 6; i++) {
-				Icons::drawIcon(i, 87 + (i % 2) * 32, 13 + (i / 2) * 20);
+				if (i!=2 && i!=3 && i!=5)
+					Icons::drawIcon(i, 87 + (i % 2) * 32, 13 + (i / 2) * 20);
 			}
 			
 			ab.drawFastHLine(65 + (cursor % 2) * 32, 2 + (cursor / 2) * 20, 31, BLACK);
