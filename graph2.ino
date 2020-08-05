@@ -1,6 +1,8 @@
 #include "extend.h"
 #include "GraphFont/GraphFont.cpp"
 
+#define DECIMAL_ACCURACY 3
+
 Arduboy2Ex ab;
 GraphFont gf = GraphFont(ab.sBuffer, Arduboy2::width(), Arduboy2::height());
 
@@ -13,12 +15,14 @@ GraphFont gf = GraphFont(ab.sBuffer, Arduboy2::width(), Arduboy2::height());
 #include "Function/function.cpp"
 #include "Graph/graph.cpp"
 #include "Table/table.cpp"
+#include "Cursor/cursor.cpp"
 
 Keypad keypad;
 Function function;
 Function directFunction;
 Graph graph;
 Table table;
+Cursor traceCursor;
 
 uint8_t state = 1;
 
@@ -32,13 +36,17 @@ bool justEntered = true;
 char funcText[32] = "5s(x)";
 char directText[32] = "2+2";
 
-uint8_t traceCursor;
+float traceX;
+float traceResult;
 float directResult;
 
 void setup() {
 	ab.begin();
 	
+	// Initialize function.
 	function.getFunction(funcText);
+	
+	// Initialize table's entries too.
 	table.reset();
 }
 
@@ -52,16 +60,23 @@ void loop() {
 		ab.clear();
 		
 		graph.draw(function);
-		table.calculate(function);
+		table.initSeq(function);
 		redrawGraph = false;
 	}
 	if (justEntered) {
 		redrawMenu = true;
 		// justEntered = false;
+		
 		// TODO: more efficient not-hacked-together menus
+		// that's a tall order.
 	}
 	
-	if (state == 0) {
+	if (state == 0) { // Debug RPN view.
+		// Accessed via selecting the secret 7th option on the menu.
+		
+		// Left side for constants,
+		// right side for tokens.
+		
 		ab.clear();
 		
 		if (ab.justPressed(UP_BUTTON   ) && cursor > 0) cursor--;
@@ -71,15 +86,19 @@ void loop() {
 		
 		if (ab.justPressed(A_BUTTON)) {
 			if (toTheTokens) {
+				// Converting an integer into a float to send it to the keypad, then casting it back to an int. Pretty.
+				// TODO: maybe an integer keypad function?
 				function.function[cursor] = (uint8_t)keypad.lazyNumberEntry((float)function.function[cursor], 0);
 			} else {
-				function.constants[cursor] = keypad.lazyNumberEntry(function.constants[cursor], 3);
+				function.constants[cursor] = keypad.lazyNumberEntry(function.constants[cursor], DECIMAL_ACCURACY);
 			}
 		}
 		if (ab.justPressed(B_BUTTON)) {
+			// TODO: it'd be nice to make this a function rather than copy-pasting it around.
 			redrawGraph = true;
 			redrawMenu = true;
 			state = 1;
+			cursor = 0;
 		}
 		
 		for (uint8_t i = 0; i < 8; i++) {
@@ -90,9 +109,9 @@ void loop() {
 			gf.print(function.function[i], HEX);
 		}
 		
-		gf.setCursor(32, cursor*7);
+		gf.setCursor(32, cursor * 7);
 		gf.print(toTheTokens ? '>' : '<');
-	} else if (state == 1) {
+	} else if (state == 1) { // Main Menu
 		ab.fastRect(64, 0, 64, 8, BLACK);
 		
 		if (ab.justPressed(UP_BUTTON) && cursor >= 2) cursor -= 2;
@@ -102,21 +121,12 @@ void loop() {
 		
 		if (ab.justPressed(A_BUTTON)) {
 			switch (cursor) {
-				case 0:
-					state = 2;
-					break;
-				case 1:
-					state = 3;
-					break;
-				case 2:
-					state = 4;
-					break;
-				case 4:
-					state = 6;
-					break;
-				case 6:
-					state = 0;
-					break;
+				case 0: state = 2; break;
+				case 1: state = 3; break;
+				case 2: state = 4; break;
+				case 3: state = 5; break;
+				case 4: state = 6; break;
+				case 6: state = 0; break;
 			}
 			redrawMenu = true;
 			cursor = 0;
@@ -201,16 +211,16 @@ void loop() {
 		if (ab.justPressed(A_BUTTON)) {
 			switch (cursor) {
 				case 0:
-					graph.window.xMin = keypad.lazyNumberEntry(graph.window.xMin, 3);
+					graph.window.xMin = keypad.lazyNumberEntry(graph.window.xMin, DECIMAL_ACCURACY);
 					break;
 				case 1:
-					graph.window.xMax = keypad.lazyNumberEntry(graph.window.xMax, 3);
+					graph.window.xMax = keypad.lazyNumberEntry(graph.window.xMax, DECIMAL_ACCURACY);
 					break;
 				case 2:
-					graph.window.yMin = keypad.lazyNumberEntry(graph.window.yMin, 3);
+					graph.window.yMin = keypad.lazyNumberEntry(graph.window.yMin, DECIMAL_ACCURACY);
 					break;
 				case 3:
-					graph.window.yMax = keypad.lazyNumberEntry(graph.window.yMax, 3);
+					graph.window.yMax = keypad.lazyNumberEntry(graph.window.yMax, DECIMAL_ACCURACY);
 					break;
 			}
 			redrawGraph = true;
@@ -223,13 +233,13 @@ void loop() {
 		
 		gf.setCursor(72, 4);
 		gf.print(F("Xmin"));
-		gf.println(graph.window.xMin, 3);
+		gf.println(graph.window.xMin, DECIMAL_ACCURACY);
 		gf.print(F("Xmax"));
-		gf.println(graph.window.xMax, 3);
+		gf.println(graph.window.xMax, DECIMAL_ACCURACY);
 		gf.print(F("Ymin"));
-		gf.println(graph.window.yMin, 3);
+		gf.println(graph.window.yMin, DECIMAL_ACCURACY);
 		gf.print(F("Ymax"));
-		gf.println(graph.window.yMax, 3);
+		gf.println(graph.window.yMax, DECIMAL_ACCURACY);
 		
 		gf.setCursor(66, 4 + cursor * 7);
 		gf.print('>');
@@ -240,26 +250,58 @@ void loop() {
 		if (ab.justPressed(DOWN_BUTTON)) table.scrollDown(function);
 		
 		if (ab.justPressed(A_BUTTON)) {
-			table.deltaX = keypad.lazyNumberEntry(table.deltaX, 3);
-			table.calculate(function);
+			table.deltaX = keypad.lazyNumberEntry(table.deltaX, DECIMAL_ACCURACY);
+			table.initSeq(function);
 		}
 		if (ab.justPressed(B_BUTTON)) {
 			redrawMenu = true;
 			state = 1;
-			cursor = 0;
 		}
 		
 		table.draw();
 	} else if (state == 5) { // Trace
+		if (justEntered) {
+			traceCursor.x = graph.width / 2;
+			traceX = graph.screenToGraphX(traceCursor.x);
+			function.calculate(traceX, traceResult);
+			traceCursor.y = graph.graphToScreenY(traceResult);
+			traceCursor.toggleVisibility();
+			justEntered = false;
+		}
+		
 		ab.fastRect(64, 0, 64, 8, BLACK);
 		
-		ab.fastRect(traceCursor, 0, 1, 8, INVERT);
+		if (ab.justPressed(LEFT_BUTTON)) {
+			traceCursor.toggleVisibility();
+			
+			if (traceCursor.x > 0) traceCursor.x--;
+			traceX = graph.screenToGraphX(traceCursor.x);
+			function.calculate(traceX, traceResult);
+			traceCursor.y = graph.graphToScreenY(traceResult);
+			
+			traceCursor.toggleVisibility();
+		}
+		if (ab.justPressed(RIGHT_BUTTON)) {
+			traceCursor.toggleVisibility();
+			
+			if (traceCursor.x < graph.width - 1) traceCursor.x++;
+			traceX = graph.screenToGraphX(traceCursor.x);
+			function.calculate(traceX, traceResult);
+			traceCursor.y = graph.graphToScreenY(traceResult);
+			
+			traceCursor.toggleVisibility();
+		}
+		
+		gf.setCursor(66, 2);
+		gf.print(F("x="));
+		gf.println(traceX);
+		gf.print(F("y="));
+		gf.println(traceResult);
 		
 		if (ab.justPressed(B_BUTTON)) {
-			ab.fastRect(traceCursor, 0, 1, 8, INVERT);
-			redrawMenu = true;
+			traceCursor.toggleVisibility();
 			state = 1;
-			cursor = 0;
+			justEntered = true;
 		}
 	} else if (state == 6) {
 		keypad.lazyFunctionEntry(NULL);

@@ -5,7 +5,7 @@ ErrorType Function::calculate(const float x, float &result) {
 	float left;
 	float right;
 	
-	// Probably rude, but ok
+	// Probably rude, but ok for error handling purposes.
 	result = NAN;
 	
 	for (uint8_t i = 0; i < FUNCTION_MAX_TOKENS; i++) {
@@ -57,6 +57,9 @@ ErrorType Function::calculate(const float x, float &result) {
 				case TOKEN_COS:
 					stack.push(cos(stack.pop()));
 					break;
+				case TOKEN_TAN:
+					stack.push(tan(stack.pop()));
+					break;
 			}
 		} else if (function[i] != TOKEN_NOP) {
 			switch (function[i]) {
@@ -74,6 +77,11 @@ ErrorType Function::calculate(const float x, float &result) {
 	} else {
 		result = stack.pop();
 	}
+	
+	if (isnan(result)) {
+		return ErrorType::NOT_A_NUMBER;
+	}
+	
 	return ErrorType::OK;
 }
 
@@ -101,13 +109,19 @@ ErrorType Function::getFunction(const char* input) {
 		}
 		
 		if (token == TOKEN_UNKNOWN) {
+			// If the token is unknown, it's probably a number. Parse it.
+			
 			function[outputFIndex++] = token = outputCIndex;
 			constants[outputCIndex++] = strtod(input + i, &endOfNumber);
+			
+			// Move the "character to read" variable past the number.
 			if (i != endOfNumber - input) i = endOfNumber - input - 1;
 		} else if (isFunction(token)) {
+			// Push onto operator stack.
 			operators.push(token);
 		} else if (isOperator(token)) {
 			if (operators.count()) {
+				// Do fun Shunting-Yard stuff.
 				uint8_t nextToken = operators.peek();
 				while (
 					isFunction(nextToken) || (
@@ -129,6 +143,7 @@ ErrorType Function::getFunction(const char* input) {
 		} else if (token == TOKEN_LBR) {
 			operators.push(token);
 		} else if (token == TOKEN_RBR) {
+			// Start looking for a matching parenthesis.
 			while (operators.count() && operators.peek() != TOKEN_LBR) {
 				function[outputFIndex++] = operators.pop();
 			}
@@ -165,8 +180,9 @@ uint8_t Function::getToken(const char input) {
 		case  ')': return TOKEN_RBR;
 		case  'x': return TOKEN_VAR;
 		case '\0': return TOKEN_NOP;
-		case  's': return TOKEN_SIN;
+		case  's': return TOKEN_SIN; // TODO: whoops, please add support for multi-character stuff..
 		case  'c': return TOKEN_COS;
+		case  't': return TOKEN_TAN;
 		default  : return TOKEN_UNKNOWN;
 	}
 }

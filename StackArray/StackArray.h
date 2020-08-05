@@ -1,3 +1,5 @@
+// TODO: remove this and rely on statically-allocated arrays only.
+
 /*
  *  StackArray.h
  *
@@ -96,7 +98,7 @@ class StackArray {
 */
 
 		// the initial size of the stack.
-		static const uint8_t initialSize = 2;
+		static const uint8_t initialSize = 8;
 
 		// the pin number of the on-board led.
 		static const uint8_t ledPin = 13;

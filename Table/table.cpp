@@ -5,11 +5,20 @@ void Table::reset() {
 	deltaX = 1.0f;
 }
 
-void Table::calculate(const Function function) {
+void Table::initSeq(const Function function) {
 	for (uint8_t i = 0; i < TABLE_HEIGHT; i++) {
 		table[0][i] = position + deltaX * i;
 		function.calculate(table[0][i], table[1][i]);
 	}
+	sequential = true;
+}
+
+void Table::initDisc() {
+	for (uint8_t i = 0; i < TABLE_HEIGHT; i++) {
+		table[0][i] = NAN;
+		table[1][i] = NAN;
+	}
+	sequential = false;
 }
 
 void Table::scrollUp(const Function function) {
@@ -54,14 +63,30 @@ void Table::draw() {
 		gf.setCursor(66, 9 + i * 9);
 		gf.print(table[0][i]);
 		
-		gf.setCursor(98, 9 + i * 9);
-		gf.print(table[1][i]);
+		if (isnan(table[1][i])) {
+			ab.fillRect(97, 8 + i * 9, 31, 8);
+			
+			gf.setTextColor(BLACK);
+			
+			gf.setCursor(98, 9 + i * 9);
+			gf.print(F("ERROR"));
+			
+			gf.setTextColor(WHITE);
+		} else {
+			gf.setCursor(98, 9 + i * 9);
+			gf.print(table[1][i]);
+		}
 		
 		ab.drawFastVLine(96, 8 + i * 9, 8);
 		ab.drawFastHLine(64, 16 + i * 9, 64);
 	}
 	
-	gf.setCursor(66, 9 + TABLE_HEIGHT * 9);
+	ab.drawFastHLine(64, 8 + TABLE_HEIGHT * 9, 64);
+	
+	gf.setCursor(66, 10 + TABLE_HEIGHT * 9);
 	gf.print(F("dx="));
 	gf.print(deltaX);
+	
+	ab.drawFastVLine(117, 54, 10);
+	Icons::drawIcon(6, 119, 55);
 }

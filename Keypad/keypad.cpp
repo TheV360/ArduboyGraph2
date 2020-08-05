@@ -148,9 +148,10 @@ float Keypad::getValue() {
 
 // Get layout
 void Keypad::setLayout(const uint8_t index) {
-	cursor = index; //HACK
+	cursor = index == 1; // still a hack
 	
 	memcpy_P(&layout, &KEYPAD_LAYOUTS[index], sizeof(KeypadLayout));
+	layoutIndex = index;
 }
 
 // Get layout key
@@ -184,8 +185,13 @@ char* Keypad::getKeyString(const uint8_t key) {
 		case KEYPAD_K_DIVISION: return KEYPAD_S_DIVISION;
 		case KEYPAD_K_POWER: return KEYPAD_S_POWER;
 		case KEYPAD_K_MODULUS: return KEYPAD_S_MODULUS;
-		case KEYPAD_K_VAR: return KEYPAD_S_VAR;
 		case KEYPAD_K_SINE: return KEYPAD_S_SINE;
+		case KEYPAD_K_COSINE: return KEYPAD_S_COSINE;
+		case KEYPAD_K_TANGENT: return KEYPAD_S_TANGENT;
+		case KEYPAD_K_E: return KEYPAD_S_E;
+		case KEYPAD_K_PI: return KEYPAD_S_PI;
+		case KEYPAD_K_VAR: return KEYPAD_S_VAR;
+		case KEYPAD_K_MORE: return KEYPAD_S_MORE;
 		case KEYPAD_K_DELETE: return KEYPAD_S_DELETE;
 		case KEYPAD_K_CLEAR: return KEYPAD_S_CLEAR;
 		case KEYPAD_K_OK: return KEYPAD_S_OK;
@@ -197,6 +203,9 @@ void Keypad::press() {
 	uint8_t key = getLayoutKey(cursor);
 	
 	switch (key) {
+		case KEYPAD_K_MORE: // More
+			setLayout(layoutIndex == 1 ? 2 : 1);
+			return;
 		case KEYPAD_K_OK: // OK
 			submitted = true;
 			text[textLen] = '\0';

@@ -64,4 +64,61 @@ public:
 			}
 		}
 	};
+	
+	// Modified slightly from https://mlxxxp.github.io/documents/Arduino/libraries/Arduboy2/Doxygen/html/Arduboy2_8cpp_source.html#l00554
+	void drawFastHLine2(int16_t x, int16_t y, uint8_t w, uint8_t color) {
+		int16_t xEnd; // last x point + 1
+		
+		// Do y bounds checks
+		if (y < 0 || y >= HEIGHT)
+			return;
+		
+		xEnd = x + w;
+		
+		// Check if the entire line is not on the display
+		if (xEnd <= 0 || x >= WIDTH)
+			return;
+		
+		// Don't start before the left edge
+		if (x < 0)
+			x = 0;
+		
+		// Don't end past the right edge
+		if (xEnd > WIDTH)
+			xEnd = WIDTH;
+		
+		// calculate actual width (even if unchanged)
+		w = xEnd - x;
+		
+		// buffer pointer plus row offset + x offset
+		register uint8_t *pBuf = sBuffer + ((y / 8) * WIDTH) + x;
+		
+		// pixel mask
+		register uint8_t mask = 1 << (y & 7);
+		
+		switch (color)
+		{
+			case WHITE:
+				while (w--)
+				{
+					*pBuf++ |= mask;
+				}
+				break;
+			
+			case BLACK:
+				mask = ~mask;
+				while (w--)
+				{
+					*pBuf++ &= mask;
+				}
+				break;
+			
+			case INVERT:
+				while (w--)
+				{
+					*pBuf++ ^= mask;
+				}
+				break;
+		}
+	};
 };

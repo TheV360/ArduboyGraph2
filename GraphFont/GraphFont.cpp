@@ -76,6 +76,7 @@ void GraphFont::printChar(char c, int16_t x, int16_t y)
 
 void GraphFont::drawByte(int16_t x, int16_t y, uint8_t pixels, uint8_t color) {
 	// TODO: fix ALL THE BUGS
+	// more specifically: when you draw off the side of the screen, it leaks onto the next row of the screen.
 	
 	uint8_t row = (uint8_t)y / 8;
 

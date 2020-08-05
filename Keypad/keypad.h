@@ -21,9 +21,12 @@
 #define KEYPAD_K_POWER 0x18
 #define KEYPAD_K_MODULUS 0x19
 #define KEYPAD_K_SINE 0x20
-// #define KEYPAD_K_E 0xFA
-// #define KEYPAD_K_PI 0xFB
-#define KEYPAD_K_VAR 0xFC
+#define KEYPAD_K_COSINE 0x21
+#define KEYPAD_K_TANGENT 0x22
+#define KEYPAD_K_E 0xE0
+#define KEYPAD_K_PI 0xE1
+#define KEYPAD_K_VAR 0xFB
+#define KEYPAD_K_MORE 0xFC
 #define KEYPAD_K_DELETE 0xFD
 #define KEYPAD_K_CLEAR 0xFE
 #define KEYPAD_K_OK 0xFF
@@ -33,6 +36,11 @@ struct KeypadLayout {
 	uint8_t height;
 	const uint8_t* labels;
 };
+
+// I could save some memory by swapping their x and y values
+// and having the number keyboard be a pointer to the middle
+// of the function keyboard. But that sounds like a little bit
+// more work than I wanna do right now...
 
 const uint8_t KEYPAD_LAYOUT_NUMBER[] PROGMEM = {
 	KEYPAD_K_OK, KEYPAD_K_DELETE , KEYPAD_K_CLEAR,
@@ -46,13 +54,20 @@ const uint8_t KEYPAD_LAYOUT_FUNCTION[] PROGMEM = {
 	KEYPAD_K_LPAREN , KEYPAD_K_OK, KEYPAD_K_DELETE , KEYPAD_K_CLEAR, KEYPAD_K_POWER   ,
 	KEYPAD_K_RPAREN , KEYPAD_K_7 , KEYPAD_K_8      , KEYPAD_K_9    , KEYPAD_K_DIVISION,
 	KEYPAD_K_MODULUS, KEYPAD_K_4 , KEYPAD_K_5      , KEYPAD_K_6    , KEYPAD_K_MULTIPLY,
-	KEYPAD_K_SINE   , KEYPAD_K_1 , KEYPAD_K_2      , KEYPAD_K_3    , KEYPAD_K_SUBTRACT,
-	KEYPAD_K_VAR    , KEYPAD_K_0 , KEYPAD_K_DECIMAL, KEYPAD_K_SIGN , KEYPAD_K_ADDITION,
+	KEYPAD_K_VAR    , KEYPAD_K_1 , KEYPAD_K_2      , KEYPAD_K_3    , KEYPAD_K_SUBTRACT,
+	KEYPAD_K_MORE   , KEYPAD_K_0 , KEYPAD_K_DECIMAL, KEYPAD_K_SIGN , KEYPAD_K_ADDITION,
+};
+
+const uint8_t KEYPAD_LAYOUT_ALTERNATE[] PROGMEM = {
+	KEYPAD_K_OK  , KEYPAD_K_DELETE, KEYPAD_K_CLEAR  ,
+	KEYPAD_K_SINE, KEYPAD_K_COSINE, KEYPAD_K_TANGENT,
+	KEYPAD_K_MORE, KEYPAD_K_PI    , KEYPAD_K_E      ,
 };
 
 const KeypadLayout KEYPAD_LAYOUTS[] PROGMEM = {
 	{3, 5, KEYPAD_LAYOUT_NUMBER},
-	{5, 5, KEYPAD_LAYOUT_FUNCTION}
+	{5, 5, KEYPAD_LAYOUT_FUNCTION},
+	{3, 3, KEYPAD_LAYOUT_ALTERNATE}
 };
 
 const char* const KEYPAD_S_0 PROGMEM = "0";
@@ -75,10 +90,13 @@ const char* const KEYPAD_S_MULTIPLY PROGMEM = "*";
 const char* const KEYPAD_S_DIVISION PROGMEM = "/";
 const char* const KEYPAD_S_POWER PROGMEM = "^";
 const char* const KEYPAD_S_MODULUS PROGMEM = "%";
-// const char* const KEYPAD_S_E PROGMEM = "E";
-// const char* const KEYPAD_S_PI PROGMEM = "p";
-const char* const KEYPAD_S_VAR PROGMEM = "x";
+const char* const KEYPAD_S_E PROGMEM = "E";
+const char* const KEYPAD_S_PI PROGMEM = "pi";
 const char* const KEYPAD_S_SINE PROGMEM = "s(";
+const char* const KEYPAD_S_COSINE PROGMEM = "c(";
+const char* const KEYPAD_S_TANGENT PROGMEM = "t(";
+const char* const KEYPAD_S_VAR PROGMEM = "x";
+const char* const KEYPAD_S_MORE PROGMEM = "Fn";
 const char* const KEYPAD_S_DELETE PROGMEM = "<-";
 const char* const KEYPAD_S_CLEAR PROGMEM = "<<";
 const char* const KEYPAD_S_OK PROGMEM = "OK";
@@ -111,6 +129,7 @@ class Keypad {
 		uint8_t getLayoutKey(const uint8_t x, const uint8_t y);
 		char* getKeyString(const uint8_t key);
 		
+		uint8_t layoutIndex;
 		KeypadLayout layout;
 		
 		void press();

@@ -1,6 +1,6 @@
 #pragma once
 
-#define FUNCTION_MAX_TOKENS 64
+#define FUNCTION_MAX_TOKENS 32
 #define FUNCTION_MAX_CONST 16
 
 #define TOKEN_CONSTANT_START 0x00
@@ -26,6 +26,7 @@
 // Functions
 #define TOKEN_SIN 0x80 // sin
 #define TOKEN_COS 0x81 // cos
+#define TOKEN_TAN 0x82 // tan
 // Special
 #define TOKEN_LBR 0xf0 // (
 #define TOKEN_RBR 0xf1 // )
@@ -34,15 +35,21 @@
 enum class ErrorType : uint8_t {
 	OK,
 	PARENTHESIS_MISMATCH,
-	NOT_ENOUGH_PARAMETERS
+	NOT_ENOUGH_PARAMETERS,
+	NOT_A_NUMBER
 };
+
+bool ignorableError(ErrorType e) {
+	return e == ErrorType::OK || e == ErrorType::NOT_A_NUMBER;
+}
 
 const char ERROR_0[] PROGMEM = "Wait...";
 const char ERROR_1[] PROGMEM = "Brackets mismatch";
 const char ERROR_2[] PROGMEM = "Syntax Error";
+const char ERROR_3[] PROGMEM = "Not a Number";
 
 const char* const ERRORS[] PROGMEM = {
-	ERROR_0, ERROR_1, ERROR_2
+	ERROR_0, ERROR_1, ERROR_2, ERROR_3
 };
 
 void lazierShowError(ErrorType error) {

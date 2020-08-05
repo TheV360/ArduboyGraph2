@@ -9,8 +9,12 @@ class Table {
 		float position;
 		float deltaX;
 		
+		bool sequential;
+		
 		void reset();
-		void calculate(const Function function);
+		
+		void initSeq(const Function function);
+		void initDisc();
 		
 		void scrollUp(const Function function);
 		void scrollDown(const Function function);
